@@ -1,0 +1,67 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXGroup section */
+		15F7E7931719A51E00AD8BA6 = {
+			isa = PBXGroup;
+			children = (
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		15F7E7951719A51E00AD8BA6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "Arizona State University";
+			};
+			buildConfigurationList = 15F7E7981719A51E00AD8BA6 /* Build configuration list for PBXProject "Seshat" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 15F7E7931719A51E00AD8BA6;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		15F7E79A1719A51E00AD8BA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		15F7E79B1719A51E00AD8BA6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		15F7E7981719A51E00AD8BA6 /* Build configuration list for PBXProject "Seshat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				15F7E79A1719A51E00AD8BA6 /* Debug */,
+				15F7E79B1719A51E00AD8BA6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 15F7E7951719A51E00AD8BA6 /* Project object */;
+}
