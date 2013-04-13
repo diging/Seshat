@@ -1,0 +1,1 @@
+"""Creates a new Corpus (with Papers and Authors) from a Web of Science file."""

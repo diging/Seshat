@@ -12,18 +12,68 @@
 		15F7E79F1719A7BB00AD8BA6 /* graphs.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = graphs.py; path = seshat/graphs.py; sourceTree = "<group>"; };
 		15F7E7A01719A81800AD8BA6 /* objects.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = objects.py; path = seshat/objects.py; sourceTree = "<group>"; };
 		15F7E7A41719B34600AD8BA6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		15F7E7A51719B87000AD8BA6 /* __init__.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = __init__.py; path = seshat/Databases/__init__.py; sourceTree = "<group>"; };
+		15F7E7A71719B89200AD8BA6 /* google.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = google.py; path = seshat/Databases/google.py; sourceTree = "<group>"; };
+		15F7E7A81719D5DF00AD8BA6 /* __init__.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = __init__.py; path = seshat/Datasources/__init__.py; sourceTree = "<group>"; };
+		15F7E7AA1719D5F300AD8BA6 /* mendeley.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = mendeley.py; path = seshat/Datasources/mendeley.py; sourceTree = "<group>"; };
+		15F7E7AB1719D60200AD8BA6 /* bibtex.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = bibtex.py; path = seshat/Datasources/bibtex.py; sourceTree = "<group>"; };
+		15F7E7AC1719D61800AD8BA6 /* wos.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = wos.py; path = seshat/Datasources/wos.py; sourceTree = "<group>"; };
+		15F7E7AD1719D63100AD8BA6 /* __init__.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = __init__.py; path = seshat/Processing/__init__.py; sourceTree = "<group>"; };
+		15F7E7B11719D82900AD8BA6 /* __init__.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = __init__.py; path = seshat/Services/__init__.py; sourceTree = "<group>"; };
+		15F7E7B31719D84200AD8BA6 /* conceptpower.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = conceptpower.py; path = seshat/Services/conceptpower.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		15F7E7931719A51E00AD8BA6 = {
 			isa = PBXGroup;
 			children = (
+				15F7E7AE1719D63C00AD8BA6 /* Processing */,
+				15F7E7A61719B87600AD8BA6 /* Databases */,
 				15F7E7A01719A81800AD8BA6 /* objects.py */,
 				15F7E7A41719B34600AD8BA6 /* README.md */,
 				15F7E79F1719A7BB00AD8BA6 /* graphs.py */,
 				15F7E79E1719A66600AD8BA6 /* main.py */,
 				15F7E79D1719A65200AD8BA6 /* __init__.py */,
+				15F7E7A91719D5E200AD8BA6 /* Datasources */,
+				15F7E7B21719D82E00AD8BA6 /* Services */,
 			);
+			sourceTree = "<group>";
+		};
+		15F7E7A61719B87600AD8BA6 /* Databases */ = {
+			isa = PBXGroup;
+			children = (
+				15F7E7A51719B87000AD8BA6 /* __init__.py */,
+				15F7E7A71719B89200AD8BA6 /* google.py */,
+			);
+			name = Databases;
+			sourceTree = "<group>";
+		};
+		15F7E7A91719D5E200AD8BA6 /* Datasources */ = {
+			isa = PBXGroup;
+			children = (
+				15F7E7A81719D5DF00AD8BA6 /* __init__.py */,
+				15F7E7AB1719D60200AD8BA6 /* bibtex.py */,
+				15F7E7AA1719D5F300AD8BA6 /* mendeley.py */,
+				15F7E7AC1719D61800AD8BA6 /* wos.py */,
+			);
+			name = Datasources;
+			sourceTree = "<group>";
+		};
+		15F7E7AE1719D63C00AD8BA6 /* Processing */ = {
+			isa = PBXGroup;
+			children = (
+				15F7E7AD1719D63100AD8BA6 /* __init__.py */,
+			);
+			name = Processing;
+			sourceTree = "<group>";
+		};
+		15F7E7B21719D82E00AD8BA6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				15F7E7B11719D82900AD8BA6 /* __init__.py */,
+				15F7E7B31719D84200AD8BA6 /* conceptpower.py */,
+			);
+			name = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
