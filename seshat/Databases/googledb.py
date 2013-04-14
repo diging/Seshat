@@ -2,6 +2,7 @@
 
 import datetime
 import webapp2
+import pickle
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext import blobstore
@@ -13,7 +14,6 @@ def main():
 
 class GPaper(db.Model):
     """The Google datastore model for the Paper object."""
-    id = db.StringProperty(required=False)
     uri = db.StringProperty(required=False) 
     
     title = db.StringProperty(required=False)
@@ -36,9 +36,18 @@ class GDSpace_Object(db.Model):
     
 class GCorpus(db.Model):
     """The Google datastore model for the Corpus object."""
-    id = db.StringProperty(required=False)
     title = db.StringProperty(required=False)
-    papers = db.ListProperty(basestring)
+
+class GCorpusEdge(db.Model):
+    """The Google datastore model for the CorpusEdge object."""
+    Corpus = db.ReferenceProperty(GCorpus)
+    Paper = db.ReferenceProperty(GPaper)
+
+class GSeshatGraph(db.Model):
+    """The Google datastore model for the SeshatGraph object."""
+    title = db.StringProperty(required=False)
+    type = db.StringProperty(required=False)
+    pickle = db.BlobProperty(required=False)
     
 class Datastore:
     """This class provides methods for querying data."""
@@ -48,25 +57,64 @@ class Datastore:
     def search(self, type, field, value):
         """Query the Google Datastore for entities of type type, and return a list of results where field == value."""
         
-        type = "G" + type
+        type = "G" + str(type)
         results = db.GqlQuery("SELECT * FROM " + type + " WHERE " + field + " = '" + str(value) + "'")
         return results
 
     def new(self, type):
-        """Return a new data entity of the specified type."""
-        options = { "Paper": Paper,
-                    "Author": Author,
-                    "DSpace_Object": DSpace_Object,
-                    "Corpus": Corpus
-                    }
-        def Paper():
-            return GPaper()
-        def Author():
-            return GAuthor()
-        def DSpace_Object():
-            return GDSpace_Object()
-        def Corpus():
-            return GCorpus()
+        """Returns ID of new data entity of the specified type."""
+
+        if type == "Paper":
+            entity = GPaper()
+        if type == "Author":
+            entity = GAuthor()
+        if type == "DSpace_Object":
+            entity = GDSpace_Object()
+        if type == "Corpus":
+            entity = GCorpus()
+        if type == "CorpusEdge":
+            entity = GCorpusEdge()
+        if type == "SeshatGraph":
+            entity = GSeshatGraph()
+            
+        entity.put()
+        return entity.key().id()
+    
+    def load(self, type, id):
+        """Retrieve a data entity of specified type and id from the datstore, and return it."""
+        key = db.Key.from_path(type, id)
+        return db.get(key)
+        
+    def update(self, type, id, object):
+        """Updates a data entity of type and id, using data from object."""
+        type = "G" + type
+        key = db.Key.from_path(type, id)
+        entity = db.get(key)
+
+        if type == "GPaper":
+            entity.title = object.title
+            entity.journal = object.journal
+            entity.year = object.year
+            entity.abstract = object.abstract
+            entity.pdf = object.pdf
+            entity.full_text = object.full_text
+            entity.references_text = object.references_text
+            entity.references = object.references         
+        if type == "GAuthor":
+            pass
+        if type == "GDSpace_Object":
+            pass
+        if type == "GCorpus":
+            entity.title = object.title
+        if type == "GCorpusEdge":
+            entity.Corpus = db.get(db.Key.from_path("GCorpus", object.Corpus)) 
+            entity.Paper = db.get(db.Key.from_path("GPaper", object.Paper))
+        if type == "GSeshatGraph":
+            entity.title = object.title
+            entity.type = object.__class__.__name__
+            entity.pickle = pickle.dump(object)
+            
+        entity.put()
 
 if __name__ == '__main__':
     status = main()
