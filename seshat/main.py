@@ -1,3 +1,6 @@
+import objects
+import graphs
+
 def main():
     print "Nothing to see here."
 

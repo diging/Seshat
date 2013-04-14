@@ -1,6 +1,7 @@
 """Seshat uses a variety of graphs to keep track of bibliographic relationships."""
 
 import networkx
+import sys
 
 def main():
     print "Nothing to see here."
