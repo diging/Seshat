@@ -1,6 +1,6 @@
 """Gets Papers from a BibTex file."""
 
-import bib
+import Resources.bib
 import objects
 from pprint import pprint
 
@@ -16,7 +16,7 @@ class data:
         data -- BibTex data (str)."""
     
         self.title = title
-        self.parser = bib.Bibparser(data)
+        self.parser = Resources.bib.Bibparser(data)
         self.parser.parse()
         
     def get_papers(self):

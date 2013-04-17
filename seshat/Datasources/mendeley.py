@@ -1,6 +1,6 @@
 """Connects to Mendeley, and gets Papers from a folder in the user's library."""
 
-from lib.mendeley_client import *
+from Resources.mendeley_client import *
 
 class data:
     """Methods for getting Papers from a folder in a user's library via the Mendely API."""
