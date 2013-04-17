@@ -2,8 +2,8 @@
 
 import time
 import random
-from Databases.googledb import Datastore
-ds = Datastore()
+#from Databases.googledb import Datastore
+#ds = Datastore()
 
 
 # TODO: Create more datastore options.
@@ -32,24 +32,60 @@ class SeshatObject:
         ds.update(self.__class__.__name__, self.id, self)
 
 class Paper(SeshatObject):
-    """The Paper is the unit of currency of the whole operation. These are created from data provided by the user, and are updated throughout the workflow."""
+    """The Paper is the unit of currency of the whole operation. These are created from data provided by the user or scraped from a web service, and are updated throughout the workflow.
+    
+    Each property is primarily composed of a 2-tuple, of the form (value, flag). The value can be a string, list, or dictionary. See the variable declarations below to get a sense of the format for each property. 
+    
+    The flag indicates whether the user has validated the content of the property. Even if the property value was gleaned from a service or data file, the user should manually inspect each field before the object is considered ready for ingestion into the repository."""
+
     
     def __init__(self, id=None):
-        """Create a new paper object.
+        """Create a new paper object. Don't provide an id, unless you're referring to something already saved in the datastore.
         
         Since different data sources will provide records of varying degrees of completeness, the class is initialized without any input."""
 
-        self.title = ""
-        self.id = id
+        self.title = ("", False)
+        self.citation = (
+                            {                           # These are the only three fields that we need.
+                                'journal': ("", False),
+                                'volume': ("", False),
+                                'pages': ("", False)
+                            }
+                        , False)                        # Validation should occur for the citation as a whole.
+        self.date = ("", False)                         # This is the year that the paper was published.
+        self.description = ("", False)
+        self.source = (
+                            {
+                                'source': ("", False),  # This could be "Mendeley"
+                                'uri': ("", False)      # This could be the Mendeley URI
+                            }
+                        , False)
+        self.abstract = ("", False)
+        self.creators = ([ 
+                            {                           # There should be an object of this format for each author. Validation occurs for each author name and author URI.
+                                'name': ("", False),    # The plain-text name, e.g. "Smith, John Q."
+                                'uri': ("", False)      # A URI for an entry in an authority file, e.g. http://www.digitalhps.org/concepts/WID-02374451-N-??-horse
+                            }
+                        ], False)                       # Validation should also occur for the author list as a whole.
+        self.pdf = ("", False)               # A path to a PDF.
+        self.full_text = ("", False)         # A path to a plain text file.
+        self.date_digitized = ("", False)    # http://www.iso.org/iso/iso8601
+        self.rights = (
+                            {
+                                'rights': ("", False),  # A description of the rights
+                                'holder': ("", False)   # An entity
+                            }
+                        , False)
+        
+        self.references_text = ("", False)   # A path to a plain text file containing bibliographic references.
+        self.references = []        # A list of paper IDs.
+        self.language = ("eng", False)
+        self.type = ("Text", False)
+
+        self.id = id                # This should get set by the datastore.
+
         self.start()
         
-        self.journal = ""
-        self.year = ""
-        self.abstract = ""
-        self.pdf = ""               # A path to a PDF.
-        self.full_text = ""         # A path to a plain text file.
-        self.references_text = ""   # A path to a plain text file containing bibliographic references.
-        self.references = []        # A list of paper IDs.
     
 class Author(SeshatObject):
     """An Author refers to a human who wrote something. Each object should refer to a concept in an authority, such as ConceptPower."""
