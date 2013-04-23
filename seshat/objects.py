@@ -20,12 +20,14 @@ class SeshatObject:
     def start(self):
         """Initialize the SeshatObject."""
         
+        
+        
         # Link this SeshatObject to a datastore object, e.g. a Google Datastore entity.
-        if self.id is not None:
+        #if self.id is not None:
             # TODO: Check to make sure entity really exists in the datastore.
-            pass
-        else:
-            self.id = ds.new(self.__class__.__name__)
+        #    pass
+        #else:
+        #    self.id = ds.new(self.__class__.__name__)
             
     def update(self):
         """Updates the database with any new changes to this object."""
@@ -40,9 +42,9 @@ class Paper(SeshatObject):
 
     
     def __init__(self, id=None):
-        """Create a new paper object. Don't provide an id, unless you're referring to something already saved in the datastore.
+        """Create a new paper object. Since different data sources will provide records of varying degrees of completeness, the class is initialized without any input.
         
-        Since different data sources will provide records of varying degrees of completeness, the class is initialized without any input."""
+        Call the factory provider to get a database object, with methods load(), update()."""
 
         self.title = ("", False)
         self.citation = (
@@ -78,7 +80,6 @@ class Paper(SeshatObject):
                         , False)
         
         self.references_text = ("", False)   # A path to a plain text file containing bibliographic references.
-        self.references = []        # A list of paper IDs.
         self.language = ("eng", False)
         self.type = ("Text", False)
 
