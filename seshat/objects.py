@@ -29,7 +29,7 @@ class SeshatObject:
         #    pass
         #else:
         #    self.id = ds.new(self.__class__.__name__)
-            
+    
 
     def start(self):
         """Generates a new datastore entity, or loads an existing entity if id is set."""
@@ -129,8 +129,10 @@ class Corpus(SeshatObject):
     
     def __init__(self, id=None, title=""):
         """Create a new corpus. This is basically just a bag of Paper IDs."""
-        self.title = title
+
         self.id = id
+        self.title = title
+        self.papers = []
         self.start()   
 
 class CorpusEdge(SeshatObject):

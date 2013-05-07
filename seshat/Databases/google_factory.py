@@ -15,12 +15,14 @@ class factory:
     def produce(self, type):
         if type == "Paper":
             return GooglePaper()
+        if type == "Corpus":
+            return GoogleCorpus()
             
 class GooglePaper:
     """Maps Papers onto Google Datastore entities."""
     
     def __init__(self):
-        """Do nothing."""
+        """Get started, yo."""
         self.entity = paper_entity()
         
     def load(self, id=None):
@@ -101,7 +103,27 @@ class GooglePaper:
 
         self.entity.put()
 
-        
+
+class GoogleCorpus:
+    def __init__(self):
+        self.entity = corpus_entity()
+
+    def load(self, id=None):
+        if id is not None:
+            key = db.Key.from_path("corpus_entity", id)
+            self.entity = db.get(key)        
+            self.data = {
+                'title': self.entity.title,
+                'papers': self.entity.papers
+            }
+
+    def update(self, object):
+        """Map Corpus fields onto Google Datastore corpus entity, and put it."""
+
+        self.entity.title = object.title
+        self.entity.papers = object.papers
+        self.entity.put()
+
 class paper_entity(db.Model):
     """The Google datastore model for the Paper object."""
         
@@ -165,6 +187,12 @@ class paper_entity(db.Model):
     type_validated = db.BooleanProperty(required=False) 
 
     uri = db.StringProperty(required=False)
+
+class corpus_entity(db.Model):
+    """The Google Datastore model for a Corpus."""
+    
+    title = db.StringProperty(required=False)
+    papers = db.ListProperty(basestring)
 
 
 def main():
