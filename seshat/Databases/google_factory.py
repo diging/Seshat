@@ -12,28 +12,98 @@ from google.appengine.ext.webapp import template
 class factory:
     """A factory that produces database-linked objects."""
     
-    def produce(type):
+    def produce(self, type):
         if type == "Paper":
             return GooglePaper()
             
 class GooglePaper:
-    """A Paper object that maps Papers onto Google Datastore entities."""
+    """Maps Papers onto Google Datastore entities."""
     
-    def __init__():
+    def __init__(self):
         """Do nothing."""
-        pass
+        self.entity = paper_entity()
         
-    def load(self, id):
+    def load(self, id=None):
         """Get a Google Datastore paper_entity, and map Paper fields onto Google Datastore paper entity."""
-        pass
-    
-    def update(self):
-        """Map Paper fields onto Google Datastore paper entity, and put it."""
+
+        if id is not None:
+            key = db.Key.from_path("paper_entity", id)
+            self.entity = db.get(key)
         
+            self.data = {}
+        
+            self.data = {
+                            'title':    (self.entity.title, self.entity.title_validated),
+                            'citation': ({
+                                            'journal': (self.entity.journal, self.entity.journal_validated),
+                                            'volume': (self.entity.volume, self.entity.volume_validated),
+                                            'pages': (self.entity.pages, self.entity.pages_validated)
+                                         }
+                                    , self.entity.citation_validated),
+                            'date': (self.entity.date, self.entity.date_validated),
+                            'description': (self.entity.description, self.entity.description_validated),
+                            'source': (
+                                           {
+                                                'source': (self.entity.source_name, self.entity.source_name_validated),
+                                                'uri': (self.entity.source_uri, self.entity.source_uri_validated)
+                                           }
+                                       , self.entity.source_validated),
+                            'abstract': (self.entity.abstract, self.entity.abstract_validated),
+                            'pdf': (self.entity.pdf, self.entity.pdf_validated),
+                            'full_text': (self.entity.full_text, self.entity.full_text_validated),
+                            'date_digitized': (self.entity.date_digitized, self.entity.date_digitized_validated),
+                            'rights': (
+                                            {
+                                                'rights': (self.entity.rights_value, self.entity.rights_value_validated),
+                                                'holder': (self.entity.rights_holder, self.entity.rights_holder_validated)
+                                            }
+                                    , self.entity.rights_validated),
+                            'references_text': (self.entity.references_text, self.entity.references_text_validated),
+                            'language': (self.entity.language, self.entity.language_validated),
+                            'type': (self.entity.type, self.entity.type_validated),
+                            'creators': ([], self.entity.creators_validated),
+                            'uri': self.entity.uri
+                        }
+
+            for i in range (0, len(self.entity.creators_list)):
+                self.data['creators'][0].append((self.entity.creators_list[i], self.entity.creators_list_validated[i]))
+                    
+            return True
+        else:
+            self.entity = paper_entity()
+
+    def update(self, object):
+        """Map Paper fields onto Google Datastore paper entity, and put it."""
+
+        self.entity.title, self.entity.title_validated = object.title
+        self.entity.journal, self.entity.journal_validated = object.citation[0]['journal']
+        self.entity.volume, self.entity.volume_validated = object.citation[0]['volume']
+        self.entity.pages, self.entity.pages_validated = object.citation[0]['pages']
+        self.entity.citation_validated = object.citation[1]
+        self.entity.date, self.entity.date_validated = object.date
+        self.entity.description, self.entity.description_validated = object.description
+        self.entity.source_name, self.entity.source_name_validated = object.source[0]['source']
+        self.entity.source_uri, self.entity.source_uri_validated = object.source[0]['uri']
+        self.entity.source_validated = object.source[1]
+        self.entity.abstract, self.entity.abstract_validated = object.abstract
+        self.entity.pdf, self.entity.pdf_validated = object.pdf
+        self.entity.full_text, self.entity.full_text_validated = object.full_text
+        self.entity.date_digitized, self.entity.date_digitized_validated = object.date_digitized
+        self.entity.rights_value, self.entity.rights_value_validated = object.rights[0]['rights']
+        self.entity.rights_holder, self.entity.rights_holder_validated = object.rights[0]['holder']
+        self.entity.references_text, self.entity.references_text_validated = object.references_text
+        self.entity.language, self.entity.language_validated = object.language
+        self.entity.type, self.entity.type_validated = object.type
+        self.entity.uri = object.uri
+        
+        for creator in object.creators[0]:
+            self.entity.creators_list.append
+
+        self.entity.put()
+
         
 class paper_entity(db.Model):
     """The Google datastore model for the Paper object."""
-    uri = db.StringProperty(required=False) 
         
     title = db.StringProperty(required=False)
     title_validated = db.BooleanProperty(required=False)
@@ -55,14 +125,14 @@ class paper_entity(db.Model):
     description = db.StringProperty(required=False)
     description_validated = db.BooleanProperty(required=False)
 
-    source = db.StringProperty(required=False)
-    source_validated = db.BooleanProperty(required=False)
-
+    source_name = db.StringProperty(required=False)
+    source_name_validated = db.BooleanProperty(required=False)
     source_uri = db.StringProperty(required=False)
     source_uri_validated = db.BooleanProperty(required=False)        
-
-    abstract_uri = db.StringProperty(required=False)
-    abstract_uri_validated = db.BooleanProperty(required=False) 
+    source_validated = db.BooleanProperty(required=False)
+                                   
+    abstract = db.StringProperty(required=False)
+    abstract_validated = db.BooleanProperty(required=False) 
     
     creators_list = db.ListProperty(basestring)
     creators_list_validated = db.ListProperty(bool)
@@ -79,7 +149,10 @@ class paper_entity(db.Model):
     date_digitized = db.StringProperty(required=False)
     date_digitized_validated = db.BooleanProperty(required=False)       
 
-    rights = db.StringProperty(required=False)
+    rights_value = db.StringProperty(required=False)
+    rights_value_validated = db.BooleanProperty(required=False)
+    rights_holder = db.StringProperty(required=False)
+    rights_holder_validated = db.BooleanProperty(required=False)
     rights_validated = db.BooleanProperty(required=False)       
     
     references_text = db.StringProperty(required=False)
@@ -90,97 +163,9 @@ class paper_entity(db.Model):
 
     type = db.StringProperty(required=False)
     type_validated = db.BooleanProperty(required=False) 
-        
 
-class GAuthor(db.Model):
-    """The Google datastore model for the Author object."""
-    pass
-    
-class GDSpace_Object(db.Model):
-    """The Google datastore model for the DSpace_Object object."""
-    pass
-    
-class GCorpus(db.Model):
-    """The Google datastore model for the Corpus object."""
-    title = db.StringProperty(required=False)
+    uri = db.StringProperty(required=False)
 
-class GCorpusEdge(db.Model):
-    """The Google datastore model for the CorpusEdge object."""
-    Corpus = db.ReferenceProperty(GCorpus)
-    Paper = db.ReferenceProperty(GPaper)
-
-class GSeshatGraph(db.Model):
-    """The Google datastore model for the SeshatGraph object."""
-    title = db.StringProperty(required=False)
-    type = db.StringProperty(required=False)
-    pickle = db.BlobProperty(required=False)
-    
-class Datastore:
-    """This class provides methods for querying data."""
-    def __init__(self):
-        pass
-    
-    def search(self, type, field, value):
-        """Query the Google Datastore for entities of type type, and return a list of results where field == value."""
-        
-        type = "G" + str(type)
-        results = db.GqlQuery("SELECT * FROM " + type + " WHERE " + field + " = '" + str(value) + "'")
-        return results
-
-    def new(self, type):
-        """Returns ID of new data entity of the specified type."""
-
-        if type == "Paper":
-            entity = GPaper()
-        if type == "Author":
-            entity = GAuthor()
-        if type == "DSpace_Object":
-            entity = GDSpace_Object()
-        if type == "Corpus":
-            entity = GCorpus()
-        if type == "CorpusEdge":
-            entity = GCorpusEdge()
-        if type == "SeshatGraph":
-            entity = GSeshatGraph()
-            
-        entity.put()
-        return entity.key().id()
-    
-    def load(self, type, id):
-        """Retrieve a data entity of specified type and id from the datstore, and return it."""
-        key = db.Key.from_path(type, id)
-        return db.get(key)
-        
-    def update(self, type, id, object):
-        """Updates a data entity of type and id, using data from object."""
-        type = "G" + type
-        key = db.Key.from_path(type, id)
-        entity = db.get(key)
-
-        if type == "GPaper":
-            entity.title = object.title
-            entity.journal = object.journal
-            entity.year = object.year
-            entity.abstract = object.abstract
-            entity.pdf = object.pdf
-            entity.full_text = object.full_text
-            entity.references_text = object.references_text
-            entity.references = object.references         
-        if type == "GAuthor":
-            pass
-        if type == "GDSpace_Object":
-            pass
-        if type == "GCorpus":
-            entity.title = object.title
-        if type == "GCorpusEdge":
-            entity.Corpus = db.get(db.Key.from_path("GCorpus", object.Corpus)) 
-            entity.Paper = db.get(db.Key.from_path("GPaper", object.Paper))
-        if type == "GSeshatGraph":
-            entity.title = object.title
-            entity.type = object.__class__.__name__
-            entity.pickle = pickle.dump(object)
-            
-        entity.put()
 
 def main():
     print "Nothing to see here."

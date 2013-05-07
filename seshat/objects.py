@@ -2,9 +2,10 @@
 
 import time
 import random
-#from Databases.googledb import Datastore
-#ds = Datastore()
+import sys
+import Databases.factory_provider
 
+db_factory = Databases.factory_provider.get_factory()
 
 # TODO: Create more datastore options.
 datastore = "google"
@@ -42,10 +43,11 @@ class Paper(SeshatObject):
 
     
     def __init__(self, id=None):
-        """Create a new paper object. Since different data sources will provide records of varying degrees of completeness, the class is initialized without any input.
+        """Create a new paper object. Since different data sources will provide records of varying degrees of completeness, the a new Paper object is initialized without any input.
         
         Call the factory provider to get a database object, with methods load(), update()."""
 
+        self.id = id
         self.title = ("", False)
         self.citation = (
                             {                           # These are the only three fields that we need.
@@ -83,11 +85,22 @@ class Paper(SeshatObject):
         self.language = ("eng", False)
         self.type = ("Text", False)
 
-        self.id = id                # This should get set by the datastore.
+        self.uri = ""                        # This is the handle of the DSpace object, once ingested.
 
         self.start()
-        
     
+    def start(self):
+        """Generates a new datastore entity, or loads an existing entity if id is set."""
+        
+        self.db = db_factory.produce("Paper")
+        if self.id is not None:
+            self.db.load(id)
+            for key, value in self.db.data.iteritems:
+                self.__setattr__(key, value)
+
+    def update(self):
+        self.db.update(self)
+
 class Author(SeshatObject):
     """An Author refers to a human who wrote something. Each object should refer to a concept in an authority, such as ConceptPower."""
     

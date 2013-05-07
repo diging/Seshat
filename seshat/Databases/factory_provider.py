@@ -1,10 +1,10 @@
 """Provides factories, I guess."""
 
 import Databases.google_factory as gf
+import Databases.dummy_factory as df
 
-class factory_provider:
-    """Yep."""
-    def get_factory():
+def get_factory():
         """Give 'em a factory."""
-        return gf.factory()
+        #return gf.factory()
+        return df.factory()
     
