@@ -30,9 +30,19 @@ class SeshatObject:
         #else:
         #    self.id = ds.new(self.__class__.__name__)
             
+
+    def start(self):
+        """Generates a new datastore entity, or loads an existing entity if id is set."""
+        
+        self.db = db_factory.produce(self.__class__.__name__)
+        if self.id is not None:
+            self.db.load(id)
+            for key, value in self.db.data.iteritems:
+                self.__setattr__(key, value)
+
     def update(self):
-        """Updates the database with any new changes to this object."""
-        ds.update(self.__class__.__name__, self.id, self)
+        self.db.update(self)
+
 
 class Paper(SeshatObject):
     """The Paper is the unit of currency of the whole operation. These are created from data provided by the user or scraped from a web service, and are updated throughout the workflow.
@@ -89,17 +99,7 @@ class Paper(SeshatObject):
 
         self.start()
     
-    def start(self):
-        """Generates a new datastore entity, or loads an existing entity if id is set."""
-        
-        self.db = db_factory.produce("Paper")
-        if self.id is not None:
-            self.db.load(id)
-            for key, value in self.db.data.iteritems:
-                self.__setattr__(key, value)
 
-    def update(self):
-        self.db.update(self)
 
 class Author(SeshatObject):
     """An Author refers to a human who wrote something. Each object should refer to a concept in an authority, such as ConceptPower."""
