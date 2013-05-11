@@ -66,6 +66,34 @@ class PaperHandler(webapp2.RequestHandler):
         if user:
             if id is not None:
                 paper = objects.Paper(id)
+                path = self.request.get('field').split(".")
+                validated = bool(self.request.get('validated'))
+                value = self.request.get('value')
+                
+                # User sets a value that has no parent.
+                if len(path) == 1:  
+                    setattr(paper, path[0], (value.replace("\n", ""), validated))
+                    paper.update()
+            
+                # User indicates that a field is correct.
+                elif path[-1] == 'validated':
+                
+                    # The field has no parent.
+                    if len(path) == 2:
+                        field_value = getattr(paper, path[0])[0]
+                        setattr(paper, path[0], (field_value, validated))
+                        paper.update()
+                    
+                    # The field has a parent.
+                    if len(path) > 2:
+                        field_value = paper.__dict__[str(path[0])][0][str(path[1])][0]
+                        paper.__dict__[str(path[0])][0][str(path[1])] = (field_value, validated)
+                        paper.update()
+            
+                # User sets a value for a nested field.
+                elif len(path) > 1:
+                    paper.__dict__[str(path[0])][0][str(path[1])] = (value, validated)
+                    paper.update()
         else:
             self.redirect(users.create_login_url(self.request.uri))
     

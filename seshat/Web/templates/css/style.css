@@ -62,6 +62,20 @@ div#navigation li a:hover {
 }
 
 
+.input {
+	width: 500px;
+}
+.input[name=description] {
+	height: 80px;
+}
+.input[name=abstract] {
+	height: 80px;
+}
+
+input[type=checkbox] {
+	height: 30px;
+	width: 30px;
+}
 
 #filedrag
 {

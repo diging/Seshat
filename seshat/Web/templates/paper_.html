@@ -3,25 +3,138 @@
         <table>
             <tr style="text-align:top;">
                 <td style="width: 200px;">Title</td>
-                <td style="width: 500px;"><textarea name="title" class="input" style="width: 500px;">{{ paper.title.0 }}</textarea></td>
-                <td style="width: 100px;"><input style="height: 30px; width: 30px;" type="checkbox" class="input" name="title.validated" {% if paper.title.1 %}checked{% endif %} /></td>
+                <td><textarea name="title" class="input">{{ paper.title.0 }}</textarea></td>
+                <td style="width: 100px;"><input type="checkbox" class="input" name="title.validated" {% if paper.title.1 %}checked{% endif %} /></td>
             </tr>
             <tr>
-                <td style="width: 200px;">Test</td>
-                <td style="width: 500px;"><textarea name="parent.test" class="input" style="width: 500px;">{{ paper.title.0 }}</textarea></td>
-                <td style="width: 100px;"><input style="height: 30px; width: 30px;" type="checkbox" class="input" name="parent.test.validated" {% if paper.title.1 %}checked{% endif %} /></td>
+                <td>Date</td>
+                <td><input name="date" class="input" type="text" value="{{ paper.date.0 }}"></td>
+                <td><input type="checkbox" class="input" name="date.validated" {% if paper.date.1 %}checked{% endif %} /></td>
             </tr>
+            <tr>
+                <td>Date Digitized</td>
+                <td><input name="date_digitized" class="input" type="text" value="{{ paper.date_digitized.0 }}"></td>
+                <td><input type="checkbox" class="input" name="date_digitized.validated" {% if paper.date_digitized.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            <tr>
+                <td colspan="2">Citation</td>
+                <td><input type="checkbox" class="input" name="citation.validated" {% if paper.citation.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            <tr>
+                <td>Journal</td>
+                <td><input type="text" name="citation.journal" class="input" value="{{ paper.citation.0.journal.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="citation.journal.validated" {% if paper.citation.0.journal.1 %}checked{% endif %} /></td>
+            </tr>
+            <tr>
+                <td>Volume</td>
+                <td><input type="text" name="citation.volume" class="input" value="{{ paper.citation.0.volume.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="citation.volume.validated" {% if paper.citation.0.volume.1 %}checked{% endif %} /></td>
+            </tr>
+            <tr>
+                <td>Pages</td>
+                <td><input type="text" name="citation.pages" class="input" value="{{ paper.citation.0.pages.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="citation.pages.validated" {% if paper.citation.0.pages.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            
+            <tr>
+                <td>Description</td>
+                <td><textarea name="description" class="input">{{ paper.description.0 }}</textarea></td>
+                <td><input type="checkbox" class="input" name="description.validated" {% if paper.description.1 %}checked{% endif %} /></td>
+            </tr>
+            <tr>
+                <td>Abstract</td>
+                <td><textarea name="abstract" class="input">{{ paper.abstract.0 }}</textarea></td>
+                <td><input type="checkbox" class="input" name="abstract.validated" {% if paper.abstract.1 %}checked{% endif %} /></td>
+            </tr>
+            
+           <tr>
+                <td colspan="2">Source</td>
+                <td><input type="checkbox" class="input" name="source.validated" {% if paper.source.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            <tr>
+                <td>Source Name</td>
+                <td><input type="text" name="source.source" class="input" value="{{ paper.source.0.source.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="source.source.validated" {% if paper.source.0.source.1 %}checked{% endif %} /></td>
+            </tr>
+            <tr>
+                <td>Source URI</td>
+                <td><input type="text" name="source.uri" class="input" value="{{ paper.source.0.uri.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="source.uri.validated" {% if paper.source.0.uri.1 %}checked{% endif %} /></td>
+            </tr>
+            
+           <tr>
+                <td colspan="2">Rights</td>
+                <td><input type="checkbox" class="input" name="rights.validated" {% if paper.source.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            <tr>
+                <td>Rights License</td>
+                <td><input type="text" name="rights.rights" class="input" value="{{ paper.rights.0.rights.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="rights.rights.validated" {% if paper.rights.0.rights.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            <tr>
+                <td>Rights Holder</td>
+                <td><input type="text" name="rights.holder" class="input" value="{{ paper.rights.0.holder.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="rights.holder.validated" {% if paper.rights.0.holder.1 %}checked{% endif %} /></td>
+            </tr>
+
+            <tr>
+                <td>Language</td>
+                <td><input type="text" name="language" class="input" value="{{ paper.language.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="language.validated" {% if paper.language.1 %}checked{% endif %} /></td>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td><input type="text" name="type" class="input" value="{{ paper.type.0 }}" /></td>
+                <td><input type="checkbox" class="input" name="type.validated" {% if paper.type.1 %}checked{% endif %} /></td>
+            </tr>
+            
+
         </table>
     
     </form>
 
+    <p><em><strong>Warning:</strong> Newlines will be stripped.</em></p>
 
 </div>
 
 <script>
 
-        $(".input").on('change', function(e) {
-        var path = this.name.split(".");
+    $(".input").on('change', function(e) {
+        if (this.type == "checkbox") {
+            var value = this.checked;
+            if (value) {
+                var validated = value;
+            } else {
+                var validated = '';
+            }
+        } else {
+            var value = this.value;
+            var validated = true;
+            $("[name='" + this.name + ".validated']").prop('checked', true);
+        }
+        
+        var data = {
+            field: this.name,
+            value: value,
+            validated: validated
+        }
+        var request = $.ajax({
+            url: "{{paper.id}}/update",
+            type: "post",
+            data: data
+        });
+        
+        request.done(function (resonse, textStatus, jqXHR) {
+            console.log(resonse);
+        });
+        
+/*        var path = this.name.split(".");
         if (path[path.length - 1] == 'validated') {
             field = path[path.length - 2];
             if (path.length > 2) {
@@ -40,6 +153,6 @@
             var value = this.checked;
         } else {
             var value = this.value;
-        }
+        }*/
     });
 </script>

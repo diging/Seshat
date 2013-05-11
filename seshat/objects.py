@@ -93,8 +93,8 @@ class Paper(SeshatObject):
                         , False)
         
         self.references_text = ("", False)   # A path to a plain text file containing bibliographic references.
-        self.language = ("eng", False)
-        self.type = ("Text", False)
+        self.language = ("eng", True)
+        self.type = ("Text", True)
 
         self.uri = ""                        # This is the handle of the DSpace object, once ingested.
 
