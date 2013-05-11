@@ -44,6 +44,10 @@ div#navigation li a:hover {
 	color: blue;
 }
 
+#paper_values table tr td {
+	padding: 7px;
+}
+
 #content {
 	padding: 10px;
 }

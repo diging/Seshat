@@ -4,7 +4,7 @@
             <tr style="text-align:top;">
                 <td style="width: 200px;">Title</td>
                 <td><textarea name="title" class="input">{{ paper.title.0 }}</textarea></td>
-                <td style="width: 100px;"><input type="checkbox" class="input" name="title.validated" {% if paper.title.1 %}checked{% endif %} /></td>
+                <td style="width: 50px;"><input type="checkbox" class="input" name="title.validated" {% if paper.title.1 %}checked{% endif %} /></td>
             </tr>
             <tr>
                 <td>Date</td>
@@ -18,7 +18,7 @@
             </tr>
             
             <tr>
-                <td colspan="2">Citation</td>
+                <td colspan="2" style="background: #F8F8F8;">Citation</td>
                 <td><input type="checkbox" class="input" name="citation.validated" {% if paper.citation.1 %}checked{% endif %} /></td>
             </tr>
             
@@ -51,7 +51,7 @@
             </tr>
             
            <tr>
-                <td colspan="2">Source</td>
+                <td colspan="2" style="background: #F8F8F8;">Source</td>
                 <td><input type="checkbox" class="input" name="source.validated" {% if paper.source.1 %}checked{% endif %} /></td>
             </tr>
             
@@ -66,8 +66,9 @@
                 <td><input type="checkbox" class="input" name="source.uri.validated" {% if paper.source.0.uri.1 %}checked{% endif %} /></td>
             </tr>
             
-           <tr>
-                <td colspan="2">Rights</td>
+            
+            <tr>
+                <td colspan="2" style="background: #F8F8F8;">Rights</td>
                 <td><input type="checkbox" class="input" name="rights.validated" {% if paper.source.1 %}checked{% endif %} /></td>
             </tr>
             
