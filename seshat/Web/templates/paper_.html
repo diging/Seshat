@@ -1,0 +1,45 @@
+<div id="content">
+    <form id="paper_values">
+        <table>
+            <tr style="text-align:top;">
+                <td style="width: 200px;">Title</td>
+                <td style="width: 500px;"><textarea name="title" class="input" style="width: 500px;">{{ paper.title.0 }}</textarea></td>
+                <td style="width: 100px;"><input style="height: 30px; width: 30px;" type="checkbox" class="input" name="title.validated" {% if paper.title.1 %}checked{% endif %} /></td>
+            </tr>
+            <tr>
+                <td style="width: 200px;">Test</td>
+                <td style="width: 500px;"><textarea name="parent.test" class="input" style="width: 500px;">{{ paper.title.0 }}</textarea></td>
+                <td style="width: 100px;"><input style="height: 30px; width: 30px;" type="checkbox" class="input" name="parent.test.validated" {% if paper.title.1 %}checked{% endif %} /></td>
+            </tr>
+        </table>
+    
+    </form>
+
+
+</div>
+
+<script>
+
+        $(".input").on('change', function(e) {
+        var path = this.name.split(".");
+        if (path[path.length - 1] == 'validated') {
+            field = path[path.length - 2];
+            if (path.length > 2) {
+                var parent = path[path.length - 3];
+            } else {
+                var parent = "None";
+            }
+        } else {
+            if (path.length > 1) {
+                var parent = path[path.length - 2];
+            } else {
+                var parent = "None";
+            }
+        }
+        if (this.type == "checkbox") {
+            var value = this.checked;
+        } else {
+            var value = this.value;
+        }
+    });
+</script>

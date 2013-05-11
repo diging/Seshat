@@ -10,9 +10,38 @@ body {
 	border-bottom: 1px solid gray;
 }
 
-#header h1 {
-	padding: 10px;
+div#title {
+	padding-left: 10px;
+	padding-top: 10px;
+	display: inline-block;
+	width: 45%;
+	height: 70px;
+}
+
+#header div#title h1.title {
 	font-size: 2.5em;
+	height: 70px;
+	margin-top: 0px;
+}
+
+div#navigation {
+	display: inline-block;
+	margin-top: 0px;
+	margin-right: 10px;
+	text-align: right;
+	width: 50%;
+}
+
+div#navigation li {
+	list-style-type: none;
+}
+
+div#navigation li a {
+	text-decoration: none;
+	color: black;
+}
+div#navigation li a:hover {
+	color: blue;
 }
 
 #content {
@@ -31,6 +60,8 @@ body {
 	margin-right: 10px;
 	text-align: right;
 }
+
+
 
 #filedrag
 {

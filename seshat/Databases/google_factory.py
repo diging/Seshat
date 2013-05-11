@@ -30,9 +30,9 @@ class GooglePaper:
         """Get a Google Datastore paper_entity, and map Paper fields onto Google Datastore paper entity."""
 
         if id is not None:
-            key = db.Key.from_path("paper_entity", id)
+            key = db.Key.from_path(self.entity.kind(), int(id))
             self.entity = db.get(key)
-        
+            
             self.data = {}
         
             self.data = {
@@ -102,7 +102,7 @@ class GooglePaper:
         for creator in object.creators[0]:
             self.entity.creators_list.append
 
-        self.entity.put()
+        return self.entity.put().id()
 
 
 class GoogleCorpus:
@@ -123,7 +123,7 @@ class GoogleCorpus:
 
         self.entity.title = object.title
         self.entity.papers = object.papers
-        self.entity.put()
+        return self.entity.put().id()
 
 class GoogleGetter:
     """For grabbing bunches of things out of the Google datastore."""

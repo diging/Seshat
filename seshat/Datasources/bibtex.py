@@ -26,17 +26,17 @@ class data:
             paper = objects.Paper()
             paper.title = (self.parser.records[record]['title'], False)
             try:
-                paper.citation['journal'] = (self.parser.records[record]['journal'], False)
+                paper.citation[0]['journal'] = (self.parser.records[record]['journal'], False)
             except KeyError:
                 pass
                 
             try:
-                paper.citation['volume'] = (self.parser.records[record]['volume'], False)
+                paper.citation[0]['volume'] = (self.parser.records[record]['volume'], False)
             except KeyError:
                 pass
                 
             try:
-                paper.citation['pages'] = (self.parser.records[record]['pages'], False)
+                paper.citation[0]['pages'] = (self.parser.records[record]['pages'], False)
             except KeyError:
                 pass
 

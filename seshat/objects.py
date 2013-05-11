@@ -29,7 +29,20 @@ class SeshatObject:
                 setattr(self, key, value)
 
     def update(self):
-        self.db.update(self)
+        self.id = self.db.update(self)
+
+    def completion(self):
+        """Checks how many of the attributes have been validated, and returns the proportion (float)."""
+
+        attributes = 0.0
+        validated = 0.0
+        for key, value in self.__dict__.iteritems():
+            try:    # Only want attributes that are tuples, since those are the ones that can be validated.
+                if value[1]: validated += 1
+                attributes += 1
+            except (AttributeError, IndexError):
+                pass
+        return validated/attributes
 
 
 class Paper(SeshatObject):

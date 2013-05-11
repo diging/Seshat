@@ -7,7 +7,7 @@
     {% for corpus in corpora %}
         <tr>
             <td><a href="corpus/view/{{corpus.id}}">{{corpus.title}}</a></td>
-            <td>{{corpus.size}}</td>
+            <td>{{corpus.papers|length}}</td>
         </tr>
     {% endfor %}
     </table>

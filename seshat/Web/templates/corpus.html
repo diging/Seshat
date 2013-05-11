@@ -6,7 +6,7 @@
         </tr>
         {% for paper in papers %}
         <tr id="{{ paper.id }}">
-            <td><a href="paper/{{paper.id}}">{{paper.title}}</a></td>
+            <td><a href="{{ seshat_path }}/paper/{{paper.id}}">{{paper.title}}</a></td>
             <td><progress value="{{paper.completion}}" max="100" style="width:50px;" /></td>
             <td class="file" id="file_pdf">{% if paper.file_pdf != None %}<a href="/serve/{{paper.file_pdf}}" target="_blank">PDF</a> (<a href="/bitstream/{{paper.id}}/file_pdf">Replace</a>){% else %}<a href="/bitstream/{{paper.id}}/file_pdf">Add PDF</a>{% endif %}</td>
             <td class="file" id="file_cocr">{% if paper.file_cocr != None %}<a href="/serve/{{paper.file_cocr}}" target="_blank">cOCR</a> (<a href="/bitstream/{{paper.id}}/file_cocr">Replace</a>){% else %}<a href="/bitstream/{{paper.id}}/file_cocr">Add cOCR</a>{% endif %}</td>
