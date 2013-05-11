@@ -1,0 +1,34 @@
+<form action="#" method="post">
+    Title: <input type="text" id="title" name="title" size="50" />
+    <label for="file">BibTex file:</label>
+    <input type="file" id="file" name="file" />
+    <input type="hidden" id="bibtex" name="bibtex" />
+    <input type="submit" id="submit" style="display:none;" Submit />
+</form>
+
+<script>
+
+// Don't allow the user to upload until both the title and a BibTex file are provided.
+function checkReady() {
+    if ( $('#title').val() && $('#file').val()) {
+        $('#submit').css("display", "inline");
+    } else {
+        $('#submit').css("display", "none");    
+    }
+}
+
+$('#file').on('change', function(e) {
+    files = e.target.files;
+    $.each(files, function(index, file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#bibtex').attr("value", e.target.result);
+        }
+        reader.readAsText(file)
+    });
+    checkReady();
+});
+
+$('#title').on('change', function(e) { checkReady(); });
+
+</script>

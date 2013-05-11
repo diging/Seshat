@@ -5,6 +5,6 @@ import Databases.dummy_factory as df
 
 def get_factory():
         """Give 'em a factory."""
-        #return gf.factory()
-        return df.factory()
+        return gf.factory()
+        #return df.factory()
     

@@ -1,13 +1,11 @@
 """Gets Papers from a BibTex file."""
-
 import Resources.bib
 import objects
-from pprint import pprint
 
 class data:
     """Methods for converting a BibTex data file into a list of Seshat Paper objects."""
-    
-    def __init__(self, data, title):
+        
+    def data(self, data, title):
         """Use [BibPy][] to parse BibTex data.
     
             [bibpy]: https://github.com/ptigas/bibpy

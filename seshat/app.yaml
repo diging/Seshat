@@ -4,5 +4,10 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /testing
+- url: .*/css
+  static_dir: Web/templates/css
+- url: .*/javascript
+  static_dir: Web/templates/javascript
+  
+- url: .*
   script: main.py

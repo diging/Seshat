@@ -4,6 +4,7 @@ import time
 import random
 import sys
 import Databases.factory_provider
+from pprint import pprint
 
 db_factory = Databases.factory_provider.get_factory()
 
@@ -17,28 +18,15 @@ class SeshatObject:
     """Base class for all data objects used by Seshat. Each new object is given an internal ID, which is based on a unix timestamp."""
     def __init__(self):
         pass
-
-    def start(self):
-        """Initialize the SeshatObject."""
-        
-        
-        
-        # Link this SeshatObject to a datastore object, e.g. a Google Datastore entity.
-        #if self.id is not None:
-            # TODO: Check to make sure entity really exists in the datastore.
-        #    pass
-        #else:
-        #    self.id = ds.new(self.__class__.__name__)
     
-
     def start(self):
         """Generates a new datastore entity, or loads an existing entity if id is set."""
         
         self.db = db_factory.produce(self.__class__.__name__)
         if self.id is not None:
-            self.db.load(id)
-            for key, value in self.db.data.iteritems:
-                self.__setattr__(key, value)
+            self.db.load(self.id)
+            for key, value in self.db.data.iteritems():
+                setattr(self, key, value)
 
     def update(self):
         self.db.update(self)
@@ -133,7 +121,14 @@ class Corpus(SeshatObject):
         self.id = id
         self.title = title
         self.papers = []
-        self.start()   
+        self.start()
+
+class Getter(SeshatObject):
+    """A class for grabbing bunches of things."""
+
+    def __init__(self):
+        self.id = None
+        self.start()
 
 class CorpusEdge(SeshatObject):
     """This is for keeping track of corpora."""

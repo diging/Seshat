@@ -7,7 +7,6 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
-from google.appengine.ext.webapp import template
 
 class factory:
     """A factory that produces database-linked objects."""
@@ -17,6 +16,8 @@ class factory:
             return GooglePaper()
         if type == "Corpus":
             return GoogleCorpus()
+        if type == "Getter":
+            return GoogleGetter()
             
 class GooglePaper:
     """Maps Papers onto Google Datastore entities."""
@@ -110,8 +111,8 @@ class GoogleCorpus:
 
     def load(self, id=None):
         if id is not None:
-            key = db.Key.from_path("corpus_entity", id)
-            self.entity = db.get(key)        
+            key = db.Key.from_path(self.entity.kind(), int(id))
+            self.entity = db.get(key)
             self.data = {
                 'title': self.entity.title,
                 'papers': self.entity.papers
@@ -123,6 +124,25 @@ class GoogleCorpus:
         self.entity.title = object.title
         self.entity.papers = object.papers
         self.entity.put()
+
+class GoogleGetter:
+    """For grabbing bunches of things out of the Google datastore."""
+
+    def __init__(self):
+        """Nothing to do."""
+        
+        self.data = {}
+        
+        return None
+    
+    def retrieve_all(self, type=None):
+        """Returns a list of ids (float)."""
+        result = []
+        if type == "Corpus":
+            corpora = db.GqlQuery("SELECT * FROM corpus_entity")
+            for c in corpora:
+                result.append(c.key().id())
+            return result
 
 class paper_entity(db.Model):
     """The Google datastore model for the Paper object."""
