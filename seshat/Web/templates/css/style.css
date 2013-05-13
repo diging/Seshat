@@ -5,9 +5,9 @@ body {
 }
 
 #header {
-	background: #FF6600;
+	background: #FF9933;
 	height: 70px;
-	border-bottom: 1px solid gray;
+	border-bottom: 2px solid gray;
 }
 
 div#title {
@@ -48,15 +48,30 @@ div#navigation li a:hover {
 	padding: 7px;
 }
 
+.batch {
+	width: 15px;
+	height: 15px;
+	background: #F0F0F0;
+	border: 3px solid gray;
+	border-radius: 15px;	
+	text-align: center;
+	font-size: 1em;
+}
+
+.batch.click {
+	background: #FF9933;
+}
+
 #content {
 	padding: 10px;
 }
 
 #footer {
-	background: #FF6600;
-	border-top: 1px solid gray;
-	height: 40px;
-	margin-top: 20px;
+	background: #FF9933;
+	border-top: 2px solid gray;
+	border-bottom: 100px solid #F0F0F0;
+	height: 200px;
+	margin-top: 100px;
 }
 
 #footer p {

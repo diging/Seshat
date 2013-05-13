@@ -1,5 +1,6 @@
 """Human interface for interacting with corpora."""
 
+import config
 import objects
 import os
 import urllib2
@@ -13,14 +14,12 @@ import Datasources.datasource_factory
 
 from google.appengine.api import users
 
-template_path = os.path.join(os.path.dirname(__file__), "templates/")
-
 class interface:
     """Human interface for interacting with corpora."""
 
     def __init__(self):
         self.template_values = {
-            'seshat_home': 'http://localhost:9080'
+            'seshat_home': config.seshat_home
         }
         return None
     
@@ -39,7 +38,7 @@ class interface:
         getter = objects.Getter()
         self.template_values['corpora'] = [ objects.Corpus(r) for r in getter.db.retrieve_all("Corpus") ]
 
-        return unicode(template.render(template_path + "corpora.html", self.template_values))
+        return unicode(template.render(config.template_path + "corpora.html", self.template_values))
 
     def view(self, request, id):
         """Display all of the papers in a corpus."""
@@ -52,8 +51,9 @@ class interface:
                                                 'id': paper.id,
                                                 'completion': paper.completion()*100
                                             } for paper in papers]
+        self.template_values['corpus_id'] = id
         
-        return unicode(template.render(template_path + "corpus.html", self.template_values))
+        return unicode(template.render(config.template_path + "corpus.html", self.template_values))
 
     def update(self, request, id):
         """Update an existing corpus."""
@@ -63,9 +63,9 @@ class interface:
         """Provide the interface for creating a new corpus."""
         
         if source is None:
-            return unicode(template.render(template_path + "add_corpus.html", self.template_values))
+            return unicode(template.render(config.template_path + "add_corpus.html", self.template_values))
         else:
-            return unicode(template.render(template_path + "add_corpus_" + source + ".html", self.template_values))
+            return unicode(template.render(config.template_path + "add_corpus_" + source + ".html", self.template_values))
 
     def new_post(self, request, source):
         """Receive and process a POST request with data to create a new corpus."""
@@ -87,7 +87,7 @@ class interface:
                                                 'id': corpus.id
                                             }
 
-        return unicode(template.render(template_path + "add_corpus_success.html", self.template_values))
+        return unicode(template.render(config.template_path + "add_corpus_success.html", self.template_values))
  
 class CorpusHandler(webapp2.RequestHandler):
     """Routes interactions with corpora to the interfaces."""
@@ -99,15 +99,17 @@ class CorpusHandler(webapp2.RequestHandler):
                 arg = self.request.get('datasource')
             else:
                 arg = id
+        
+            response = interface().do(do, self.request, arg)
             
             try:
-                self.response.out.write(    unicode(template.render(template_path + "head.html", {  'title': do,
+                self.response.out.write(    unicode(template.render(config.template_path + "head.html", {  'title': do,
                                                                                                     'user_status': user,
                                                                                                     'login': users.create_login_url(self.request.uri),
                                                                                                     'logout': users.create_logout_url('./')
                                                                                                 }))
-                                        +   interface().do(do, self.request, arg)
-                                        +   unicode(template.render(template_path + "foot.html", {}))
+                                        +   response
+                                        +   unicode(template.render(config.template_path + "foot.html", {}))
                                         )
             except (TypeError, AttributeError):
                 self.response.out.write("No such function.")
@@ -117,10 +119,10 @@ class CorpusHandler(webapp2.RequestHandler):
     def post(self, do='list', id=None):
         user = users.get_current_user()
         if user:
-            self.response.out.write(unicode(template.render(template_path + "head.html", {'title': do})))
+            self.response.out.write(unicode(template.render(config.template_path + "head.html", {'title': do})))
             if (do == 'new') and (self.request.get('datasource') is not None):
                 self.response.out.write(interface().do(do + "_post", self.request, self.request.get('datasource')))
-            self.response.out.write(unicode(template.render(template_path + "foot.html", {})))
+            self.response.out.write(unicode(template.render(config.template_path + "foot.html", {})))
         else:
             self.redirect(users.create_login_url(self.request.uri))
 
