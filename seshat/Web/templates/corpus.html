@@ -1,20 +1,34 @@
 <div id="content">
-    <table width="900">
-        <tr>
-            <td width="60%">Title</td>
-
+    <table width="900" id="corpus">
+        <tr class="head">
+            <td width="60%"></td>
+            <td>Progress</td>
+            <td>PDF</td>
+            <td>OCR</td>
+            <td>References</td>
         </tr>
         {% for paper in papers %}
-        <tr id="{{ paper.id }}">
-            <td><a href="{{ seshat_path }}/paper/{{paper.id}}?corpus={{ corpus_id }}">{{paper.title}}</a></td>
-            <td><progress value="{{paper.completion}}" max="100" style="width:50px;" /></td>
-            <td class="file" id="file_pdf">{% if paper.file_pdf != None %}<a href="/serve/{{paper.file_pdf}}" target="_blank">PDF</a> (<a href="/bitstream/{{paper.id}}/file_pdf">Replace</a>){% else %}<a href="/bitstream/{{paper.id}}/file_pdf">Add PDF</a>{% endif %}</td>
-            <td class="file" id="file_cocr">{% if paper.file_cocr != None %}<a href="/serve/{{paper.file_cocr}}" target="_blank">cOCR</a> (<a href="/bitstream/{{paper.id}}/file_cocr">Replace</a>){% else %}<a href="/bitstream/{{paper.id}}/file_cocr">Add cOCR</a>{% endif %}</td>
-            <td class="file" id="file_references">{% if paper.file_references != None %}<a href="/serve/{{paper.file_references}}" target="_blank">References</a> (<a href="/bitstream/{{paper.id}}/file_references">Replace</a>){% else %}<a href="/bitstream/{{paper.id}}/file_references">Add References</a>{% endif %}</td>
+        <tr id="{{ paper.id }}" class="papers">
+            <td>{{paper.data.date.0}}: <a href="{{ seshat_path }}/paper/{{paper.id}}?corpus={{ corpus_id }}">{{paper.title}}</a>, <em>{{ paper.data.citation.0.journal.0 }}</em></td>
+            <td width="200">
+                <div class="center">
+                    <progress value="{{paper.completion}}" max="100" style="width:70px;" />
+                </div>
+            </td>
+            <td class="file" id="file_pdf">
+                <div id="{{paper.id}}" field= "pdf" class="file_upload {% if paper.data.pdf.0 %}exists{% else %}missing{% endif %} center"> </div>
+            </td>
+            <td class="file" id="file_full_text">
+                <div id="{{paper.id}}" field= "full_text" class="file_upload {% if paper.data.full_text.0 %}exists{% else %}missing{% endif %} center"> </div>
+            </td>
+            <td class="file" id="file_references_text">
+                <div id="{{paper.id}}" field= "references_text" class="file_upload {% if paper.data.references_text.0 %}exists{% else %}missing{% endif %} center"> </div>
+            </td>
+            
         </tr>
        {% endfor %}
         
-        
+
     </table>
 
     <!--
@@ -38,3 +52,102 @@
     {% endfor %}
     </script> -->
 </div>
+
+<script>
+
+    function get_upload_url() {
+
+    }
+
+    // From http://weblog.bocoup.com/using-datatransfer-with-jquery-events/?r44b=no
+    jQuery(function(){
+      jQuery.event.props.push('dataTransfer');
+      
+      var body = jQuery('body')
+        .bind( 'dragenter dragover', false)
+        .bind( 'drop', function( e ) {
+          e.stopPropagation();
+          e.preventDefault();
+          
+          jQuery.each( e.dataTransfer.files, function(index, file){
+            var fileReader = new FileReader();
+                fileReader.onload = (function(file) {
+                   return function(e) { 
+                     body.append('<div class="dataurl"><strong>' + file.fileName + '</strong>' + e.target.result + '</div>') 
+                   }; 
+                })(file);
+            fileReader.readAsDataURL(file);
+          });
+          
+        });
+      
+    });
+
+function noopHandler(e) {
+    e.stopPropagation();
+    e.preventDefault();
+}
+
+// Called when a user drops a file onto a selected div.
+function handleFile(file, paper_id, field) {
+    
+    // Get an upload URL.
+    var request = $.ajax({
+        url: "{{seshat_home}}/upload_path",
+        type: "get",
+        data: {}
+    });
+    
+    // Once the upload URL has been retrieved, send the file that the user dropped.
+    request.done(function (upload_url, textStatus, jqXHR) {
+        // Creates a form, so the BlobHandler won't be the wiser.
+        var form = new FormData();
+        form.append("file", file);
+        
+        var data_request = $.ajax ({
+            url: upload_url,
+            type: "POST",
+            data: form,
+            processData: false,
+            contentType: false
+        });
+        
+        // Once the file has been uploaded, update the Paper entity.
+        data_request.done(function (file_url, t, j) {
+            var paper_request = $.ajax ({
+                url: "{{ seshat_home }}/paper/" + paper_id + "/update",
+                type: "post",
+                data: {
+                            field: field,
+                            value: file_url,
+                            validated: true
+                        }
+            });
+        });
+    });
+}
+
+$(".file_upload").on("dragenter", function(e) {
+    $(this).addClass("hover");
+    noopHandler(e);
+});
+$(".file_upload").on("dragleave", function(e) {
+    $(this).removeClass("hover");
+    noopHandler(e);
+});
+$(".file_upload").on("dragover", function(e) {
+    noopHandler(e);
+});
+
+// Listen for file-droppage action.
+$(".file_upload").on("drop", function(e) {
+    handleFile(e.dataTransfer.files[0], this.id, $(this).attr("field"));
+    $(this).removeClass("hover");
+    $(this).removeClass("missing");
+    $(this).addClass("exists");
+    noopHandler(e);
+});
+
+
+    
+</script>

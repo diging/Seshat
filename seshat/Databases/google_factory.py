@@ -8,6 +8,8 @@ from google.appengine.ext import webapp
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 
+
+
 class factory:
     """A factory that produces database-linked objects."""
     
@@ -18,7 +20,9 @@ class factory:
             return GoogleCorpus()
         if type == "Getter":
             return GoogleGetter()
-            
+        if type == "Generic":
+            return GoogleGeneric()
+
 class GooglePaper:
     """Maps Papers onto Google Datastore entities."""
     
@@ -144,6 +148,32 @@ class GoogleGetter:
                 result.append(c.key().id())
             return result
 
+class GoogleGeneric:
+    """For storing anything."""
+    def __init__(self):
+        self.entity = generic_entity()
+
+    def load(self, generic_key=None):
+        """generic_key is the value in the key column for a particular entity, NOT the Google datastore key.
+        
+        Sets self.entity, self.key and self.value, given key."""
+        
+        self.generic_key = generic_key
+
+        if self.generic_key is not None:
+            result = db.GqlQuery("SELECT * FROM generic_entity WHERE generic_key='"+self.generic_key+"'")
+            self.value = result[0].value
+            self.entity = db.get(result[0].key())
+
+    def update(self, object):
+        """Maps generic fields onto Google datastore generic entity, and puts it. Returns entity id."""
+        
+        self.entity.generic_key = object.generic_key
+        self.entity.value = object.value
+        return self.entity.put().id()
+
+
+
 class paper_entity(db.Model):
     """The Google datastore model for the Paper object."""
         
@@ -213,6 +243,12 @@ class corpus_entity(db.Model):
     
     title = db.StringProperty(required=False)
     papers = db.ListProperty(basestring)
+
+class generic_entity(db.Model):
+    """Stores anything, given string key and string value."""
+
+    generic_key = db.StringProperty(required=False)
+    value = db.StringProperty(required=False)
 
 
 def main():

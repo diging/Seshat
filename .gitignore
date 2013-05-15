@@ -39,3 +39,10 @@ Seshat.xcodeproj
 .DS_Store
 .Python
 *.pkl
+
+httplib2
+httplib2/*
+requests
+requests/*
+
+mendeley_config.json

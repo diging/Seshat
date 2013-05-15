@@ -2,10 +2,26 @@
 
 import os
 import sys
-
-
+import config
 from Resources import mendeley_client
+import Resources.oauth2 as oauth
 import objects
+
+
+import Databases.factory_provider
+datafactory = Databases.factory_provider.get_factory()
+
+config_file = config.seshat_root + "/Resources/mendeley_config.json"
+keys_file = config.seshat_root + "/Resources/keys_api.mendeley.com.pkl"
+
+mendeley_config = mendeley_client.MendeleyClientConfig(config_file)
+
+host = 'api.mendeley.com'
+if hasattr(mendeley_config, "host"):
+    host = mendeley_config.host
+
+client = mendeley_client.MendeleyClient(mendeley_config.api_key, mendeley_config.api_secret, {"host":host})
+tokens_store = mendeley_client.MendeleyTokensStore(keys_file)
 
 
 
@@ -14,12 +30,44 @@ class data:
     
     def __init__(self):
         """Initialize the connection to the Mendely API. Need to think about how this will work with OAuth."""
-        
-        self.mendeley = mendeley_client.create_client()  # This will get you started!
         self.FoldersList = []
         
-        pass
+        return None
         
+    def start(self, user):        
+        access_token = tokens_store.get_access_token(user)
+        if not access_token:
+            request_token, auth_url = client.get_auth_url()
+            
+            
+            request_token_store = datafactory.produce("Generic")    # Will need the request_token later, to finish the authorization.
+            request_token_store.generic_key = str(user.__dict__['_User__user_id'])
+            request_token_store.value = str(request_token)
+            request_token_store.update(request_token_store)
+            
+            return auth_url
+        else:
+            client.set_access_token(access_token)
+        return None
+    
+    def authorize(self, user, verifier):
+        #try:
+        request_token_store = datafactory.produce("Generic")
+        
+        request_token_store.load(str(user.__dict__['_User__user_id']))
+        request_token = oauth.Token.from_string(request_token_store.value)
+        print request_token
+        print verifier
+
+        client.verify_auth(request_token, str(verifier))
+        client.set_access_token(client.verify_auth(request_token, verifier))
+        tokens_store.add_account(user,client.get_access_token())
+        return True
+        #except Exception as e:
+        #    print e
+        #    return False
+
+    
     def list_folders(self):
         """Return a list of folders in a user's Mendeley library."""
         # return a list of folders, probably as tuples: ( title, uri )
@@ -64,8 +112,7 @@ class data:
         
         # return a Seshat Paper object: objects.Paper()
 
-        GivenPaperId = paper
-        ResponseFromMendeley = self.mendeley.document_details(GivenPaperId)
+        ResponseFromMendeley = self.mendeley.document_details(paper)
         
         #PaperObject = Paper()
                 
