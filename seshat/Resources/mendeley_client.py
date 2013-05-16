@@ -15,10 +15,6 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-For details of the Mendeley Open API see http://dev.mendeley.com/
-
-See test.py and the tests in unit-tests/
-
 """
 
 import hashlib
@@ -30,9 +26,9 @@ import pickle
 import requests
 import sys
 import urllib
+import objects
 
 import apidefinitions
-
 
 def resolve_http_redirect(url):
     # this function is needed to make sure oauth headers are not sent
@@ -241,45 +237,49 @@ class MendeleyAccount:
 
 class MendeleyTokensStore:
 
-    def __init__(self, filename='mendeley_api_keys.pkl'):
-        self.filename = filename
+    def __init__(self):
         self.accounts = {}
-
-        if self.filename:
-            self.load()
+        self.account_data = []
+        self.load()
 
     def __del__(self):
-        if self.filename:
-            self.save()
+        self.save()
 
     def add_account(self, key, access_token):
-        self.accounts[key] = MendeleyAccount(access_token)
+        self.accounts[str(key)] = MendeleyAccount(access_token)
+        new_account = objects.Token()
+        new_account.account = self.accounts[str(key)]
+        new_account.account_key = str(key)
+        self.account_data.append(new_account)
 
     def get_account(self, key):
         return self.accounts.get(key, None)
 
     def get_access_token(self, key):
-        if not key in self.accounts:
+        if not str(key) in self.accounts:
             return None
-        return self.accounts[key].access_token
+        return self.accounts[str(key)].access_token
 
     def remove_account(self, key):
         if not key in self.accounts:
             return
-        del self.accounts[key]
+        del self.accounts[str(key)]
 
     def save(self):
-        if not self.filename:
-            raise Exception("Need to specify a filename for this store")
-        pickle.dump(self.accounts, open(self.filename, 'w'))
+        for a in self.account_data:
+            a.update()
 
     def load(self):
-        if not self.filename:
-            raise Exception("Need to specify a filename for this store")
+        getter = objects.Getter()
         try:
-            self.accounts = pickle.load(open(self.filename, 'r'))
-        except IOError:
-            print "Can't load tokens from %s"%self.filename
+            self.account_data = [ objects.Token(t) for t in getter.db.retrieve_all("Token") ]
+            for a in self.account_data:
+                self.accounts[a.account_key] = a.account
+        
+        except Exception:   # If no tokens exist yet.
+            null_token = objects.Token()
+            null_token.account = {}
+            null_token.update()
 
 class MendeleyClientConfig:
 

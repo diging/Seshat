@@ -6,6 +6,7 @@ import config
 from Resources import mendeley_client
 import Resources.oauth2 as oauth
 import objects
+import time
 
 
 import Databases.factory_provider
@@ -21,8 +22,7 @@ if hasattr(mendeley_config, "host"):
     host = mendeley_config.host
 
 client = mendeley_client.MendeleyClient(mendeley_config.api_key, mendeley_config.api_secret, {"host":host})
-tokens_store = mendeley_client.MendeleyTokensStore(keys_file)
-
+tokens_store = mendeley_client.MendeleyTokensStore()
 
 
 class data:
@@ -34,45 +34,42 @@ class data:
         
         return None
         
-    def start(self, user):        
-        access_token = tokens_store.get_access_token(user)
-        if not access_token:
+    def start(self, user_id):
+        """If the user has already authorized Seshat to access their Mendeley library, then set access token and return None. Otherwise, pass back an auth_url for the user to visit."""
+        
+        access_token = tokens_store.get_access_token(user_id)
+        
+        if not access_token:    # User needs to authorize Seshat to access their Mendeley account.
             request_token, auth_url = client.get_auth_url()
-            
-            
+
             request_token_store = datafactory.produce("Generic")    # Will need the request_token later, to finish the authorization.
-            request_token_store.generic_key = str(user.__dict__['_User__user_id'])
+            request_token_store.generic_key = str(user_id + str(int(time.time())))
             request_token_store.value = str(request_token)
             request_token_store.update(request_token_store)
-            
-            return auth_url
+            return auth_url, request_token_store.generic_key
         else:
             client.set_access_token(access_token)
         return None
     
-    def authorize(self, user, verifier):
-        #try:
+    def authorize(self, user_id, verifier, request_token_key):
+        """Connects to Mendeley with request token and verifier (provided by user). If successful, adds a new authorization key to the token store and returns true. Otherwise, returns false."""
+        
         request_token_store = datafactory.produce("Generic")
         
-        request_token_store.load(str(user.__dict__['_User__user_id']))
-        request_token = oauth.Token.from_string(request_token_store.value)
-        print request_token
-        print verifier
-
-        client.verify_auth(request_token, str(verifier))
-        client.set_access_token(client.verify_auth(request_token, verifier))
-        tokens_store.add_account(user,client.get_access_token())
-        return True
-        #except Exception as e:
-        #    print e
-        #    return False
-
+        request_token_store.load(request_token_key)
+        request_token = oauth.Token.from_string(str(request_token_store.value))
+        try:
+            client.set_access_token(client.verify_auth(request_token, verifier))
+            tokens_store.add_account(user_id,client.get_access_token())
+            tokens_store.save()
+            return True
+        except Exception:   # If client.verify_auth() fails, throws a ValueError "Invalid parameter string."
+            return False
     
     def list_folders(self):
         """Return a list of folders in a user's Mendeley library."""
-        # return a list of folders, probably as tuples: ( title, uri )
         
-        FoldersResponse = self.mendeley.folders()
+        FoldersResponse = client.folders()
         
         FoldersList = []
 

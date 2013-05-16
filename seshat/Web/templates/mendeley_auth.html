@@ -4,17 +4,17 @@
     <ol>
         <li>Open this page in a new browser window: <a href="{{ auth_url }}" target="_blank">{{ auth_url }}</a></li>
         <li>Log in to your Mendeley account, and authorize this software.</li>
-        <li>Enter the verification code here: <input type="text" id="verification" size="20" /></li>
+        <li>Enter the verification code here: <input type="text" id="verification" size="20" /><input type="button" id="go" value="Go" /><span id="result"></span></li>
     </ol>
     
 </div>
 
 <script>
 
-$("#verification").on("change", function(e) {
+$("#go").on("click", function(e) {
     var data = {
-        verification: $(this).val(),
-        request_token: "{{ request_token }}"
+        verification: $("#verification").val(),
+        request_token_key: "{{ request_token_key }}"
     }
     var request = $.ajax({
         url: "{{ seshat_home }}/corpus/authorize_mendeley?datasource=mendeley",
@@ -22,8 +22,18 @@ $("#verification").on("change", function(e) {
         data: data
     });
     
-    request.done(function (resonse, textStatus, jqXHR) {
-        console.log(resonse);
+    request.done(function (response, textStatus, jqXHR) {
+        console.log(response)
+        if (response == "success") {
+            $("#result").text("Success!");
+            $("#result").css("font-weight", "bold");
+            $("#result").css("color", "green");
+            window.location.reload()
+        } else {
+            $("#result").text("Fail! Please try again.");
+            $("#result").css("font-style", "italic");
+            $("#result").css("color", "red");
+        }
     });
 });
 

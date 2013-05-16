@@ -76,27 +76,32 @@ class interface:
             return unicode(template.render(config.template_path + "add_corpus_" + source + ".html", self.template_values))
 
     def new_from_mendeley(self, user, request, source=None):
-        interface = Datasources.mendeley.data()
-        response = interface.start(user)
+        """If a user has already authorized Seshat to access the Mendeley library, will access their account and list folders to choose from. Otherwise, will direct user to an authorization page."""
         
-        if response is None:
-            return "Authenticated."
+        interface = Datasources.mendeley.data()
+        response = interface.start(user.user_id())    # If there is no key for this user, will return an auth_url and generic_key for a request token.
+        
+        if response is None:    # Display a list of folders to choose from.
+            folders = interface.list_folders()
+            return str(len(folders))
         else:   # User needs to authorize Seshat to access their account.
-            self.template_values['auth_url'] = response
+            self.template_values['auth_url'] = response[0]
+            self.template_values['request_token_key'] = response[1]
             return unicode(template.render(config.template_path + "mendeley_auth.html", self.template_values))
             
     def authorize_mendeley_post(self, user, request, id=None):
+        """Receives authorization requests from the authorization page, and returns result."""
+        
         interface = Datasources.mendeley.data()
         
         verifier = request.get("verification")
+        request_token_key = request.get("request_token_key")
         
-        if interface.authorize(user, verifier):
-            return "Authorized"
-            #return self.new_from_mendeley(user, request)
+        if interface.authorize(user.user_id(), verifier, request_token_key):
+            return "success"
         else:
-            return "Oops"
+            return "fail"
             
-
     def new_post(self, user, request, id=None):
         """Receive and process a POST request with data to create a new corpus."""
 
@@ -131,17 +136,17 @@ class CorpusHandler(webapp2.RequestHandler):
                 arg = id
         
             response = interface().do(do, user, self.request, arg)
-            try:
-                self.response.out.write(    unicode(template.render(config.template_path + "head.html", {  'title': do,
-                                                                                                    'user_status': user,
-                                                                                                    'login': users.create_login_url(self.request.uri),
-                                                                                                    'logout': users.create_logout_url('./')
-                                                                                                }))
-                                        +   response
-                                        +   unicode(template.render(config.template_path + "foot.html", {}))
-                                        )
-            except (TypeError, AttributeError):
-                self.response.out.write("No such function.")
+            #try:
+            self.response.out.write(    unicode(template.render(config.template_path + "head.html", {  'title': do,
+                                                                                                'user_status': user,
+                                                                                                'login': users.create_login_url(self.request.uri),
+                                                                                                'logout': users.create_logout_url('./')
+                                                                                            }))
+                                    +   response
+                                    +   unicode(template.render(config.template_path + "foot.html", {}))
+                                    )
+            #except (TypeError, AttributeError):
+               # self.response.out.write("No such function.")
         else:
             self.redirect(users.create_login_url(self.request.uri))
 

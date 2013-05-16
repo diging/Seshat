@@ -143,6 +143,14 @@ class Getter(SeshatObject):
         self.id = None
         self.start()
 
+class Token(SeshatObject):
+    """A class for storing tokens."""
+
+    def __init__(self, id=None):
+        self.id = id
+
+        self.start()
+
 class CorpusEdge(SeshatObject):
     """This is for keeping track of corpora."""
     

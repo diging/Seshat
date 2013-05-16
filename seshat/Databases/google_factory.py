@@ -4,6 +4,7 @@ import datetime
 import webapp2
 import pickle
 from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.ext import webapp
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
@@ -22,6 +23,8 @@ class factory:
             return GoogleGetter()
         if type == "Generic":
             return GoogleGeneric()
+        if type == "Token":
+            return GoogleToken()
 
 class GooglePaper:
     """Maps Papers onto Google Datastore entities."""
@@ -146,7 +149,11 @@ class GoogleGetter:
             corpora = db.GqlQuery("SELECT * FROM corpus_entity")
             for c in corpora:
                 result.append(c.key().id())
-            return result
+        if type == "Token":
+            tokens = token_entity.query()
+            result = [ t.key.id() for t in tokens ]
+    
+        return result
 
 class GoogleGeneric:
     """For storing anything."""
@@ -172,7 +179,27 @@ class GoogleGeneric:
         self.entity.value = object.value
         return self.entity.put().id()
 
+class GoogleToken:
+    """For storing tokens."""
 
+    def __init__(self):
+        self.entity = token_entity()
+
+    def load(self, id=None):
+        if id is not None:
+            self.id = id
+            key = ndb.Key("token_entity", int(id))
+            self.entity = key.get()
+
+            self.data = {
+                'account_key': self.entity.account_key,
+                'account': self.entity.account
+            }
+
+    def update(self, object):
+        self.entity.account = object.account
+        self.entity.account_key = object.account_key
+        return self.entity.put().id()
 
 class paper_entity(db.Model):
     """The Google datastore model for the Paper object."""
@@ -250,6 +277,12 @@ class generic_entity(db.Model):
     generic_key = db.StringProperty(required=False)
     value = db.StringProperty(required=False)
 
+
+class token_entity(ndb.Model):
+    """Stores tokens."""
+    
+    account_key = ndb.StringProperty(required=False)
+    account = ndb.PickleProperty(required=False)
 
 def main():
     print "Nothing to see here."
