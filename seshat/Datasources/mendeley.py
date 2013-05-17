@@ -78,13 +78,12 @@ class data:
             CurrentFolder['Id'] = Folder['id']
             CurrentFolder['Name'] = Folder['name']
             self.FoldersList.insert(len(FoldersList), CurrentFolder)
-        #response = mendeley.search('phiC31', items=10)
+
         return self.FoldersList
         
     def list_papers(self, FolderId):
         """Return a list of all papers in a given folder in a user's Mendeley library. folder should probably be a URI?"""
         
-        # return a list of papers, probably as tuples: ( title, uri )
         PapersListInFolder = self.mendeley.folder_documents(FolderId)
         
         # Code to implement paging
@@ -107,7 +106,6 @@ class data:
     def get_paper(self, paper):
         """Return a Seshat Paper object based on the available fields in a given paper. paper should probably be a URI?"""
         
-        # return a Seshat Paper object: objects.Paper()
 
         ResponseFromMendeley = self.mendeley.document_details(paper)
         
@@ -124,9 +122,7 @@ class data:
 
     def get_papers(self, folder):
         """Return a list of Seshat Paper objects, given a folder in the user's Mendely library. Each Paper should have as many of the fields filled as possible, and should have a PDF."""
-        
-        # You probably want to iterate over list_papers(), and for each item do get_paper() and get_pdf().
-        
+                
         ListOfPaperIds = self.list_papers(folder)
         
         ListOfPaperObjects = []
