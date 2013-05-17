@@ -44,5 +44,7 @@ httplib2
 httplib2/*
 requests
 requests/*
+networkx
+netowrkx/*
 
 mendeley_config.json
