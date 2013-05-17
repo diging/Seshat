@@ -1,5 +1,8 @@
 """Allows Seshat to use the Google App Engine datastore."""
 
+from __future__ import with_statement
+from google.appengine.api import files
+
 import datetime
 import webapp2
 import pickle
@@ -8,8 +11,6 @@ from google.appengine.ext import ndb
 from google.appengine.ext import webapp
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
-
-
 
 class factory:
     """A factory that produces database-linked objects."""
@@ -25,6 +26,8 @@ class factory:
             return GoogleGeneric()
         if type == "Token":
             return GoogleToken()
+        if type == "Blob":
+            return GoogleBlob()
 
 class GooglePaper:
     """Maps Papers onto Google Datastore entities."""
@@ -37,10 +40,8 @@ class GooglePaper:
         """Get a Google Datastore paper_entity, and map Paper fields onto Google Datastore paper entity."""
 
         if id is not None:
-            key = db.Key.from_path(self.entity.kind(), int(id))
-            self.entity = db.get(key)
-            
-            self.data = {}
+            key = ndb.Key("paper_entity", int(id))
+            self.entity = key.get()
         
             self.data = {
                             'title':    (self.entity.title, self.entity.title_validated),
@@ -71,12 +72,9 @@ class GooglePaper:
                             'references_text': (self.entity.references_text, self.entity.references_text_validated),
                             'language': (self.entity.language, self.entity.language_validated),
                             'type': (self.entity.type, self.entity.type_validated),
-                            'creators': ([], self.entity.creators_validated),
+                            'creators': ([ creator for creator in self.entity.creators ], self.entity.creators_validated),
                             'uri': self.entity.uri
                         }
-
-            for i in range (0, len(self.entity.creators_list)):
-                self.data['creators'][0].append((self.entity.creators_list[i], self.entity.creators_list_validated[i]))
                     
             return True
         else:
@@ -105,9 +103,18 @@ class GooglePaper:
         self.entity.language, self.entity.language_validated = object.language
         self.entity.type, self.entity.type_validated = object.type
         self.entity.uri = object.uri
-        
-        for creator in object.creators[0]:
-            self.entity.creators_list.append
+        self.entity.creators_validated = object.creators[1]
+        self.entity.creators = [ ( creator(
+                                                name=stringTuple(
+                                                                    value = c['name'][0],
+                                                                    validated = c['name'][1],
+                                                                ),
+                                                uri=stringTuple(
+                                                                    value = c['uri'][0],
+                                                                    validated = c['uri'][1],
+                                                                )
+                                            )
+                                  ) for c in object.creators[0] ]
 
         return self.entity.put().id()
 
@@ -201,69 +208,89 @@ class GoogleToken:
         self.entity.account_key = object.account_key
         return self.entity.put().id()
 
-class paper_entity(db.Model):
+class GoogleBlob:
+    """For storing blobs directly to the blobstore."""
+
+    def __init__(self):
+        pass
+
+    def write(self, data, type="application/octet-stream"):
+        """Save the blob to the blobstore, and return key."""
+        
+        self.file_name = files.blobstore.create(mime_type=type)
+        with files.open(self.file_name, 'a') as f:
+            f.write(data)
+        files.finalize(self.file_name)
+        return files.blobstore.get_blob_key(self.file_name)
+
+class stringTuple(ndb.Model):
+    value = ndb.StringProperty(required=False)
+    validated = ndb.BooleanProperty()
+
+class creator(ndb.Model):
+    name = ndb.StructuredProperty(stringTuple)
+    uri = ndb.StructuredProperty(stringTuple, required=False)
+
+class paper_entity(ndb.Model):
     """The Google datastore model for the Paper object."""
         
-    title = db.StringProperty(required=False)
-    title_validated = db.BooleanProperty(required=False)
+    title = ndb.StringProperty(required=False)
+    title_validated = ndb.BooleanProperty(required=False)
         
-    journal = db.StringProperty(required=False)
-    journal_validated = db.BooleanProperty(required=False)
+    journal = ndb.StringProperty(required=False)
+    journal_validated = ndb.BooleanProperty(required=False)
     
-    volume = db.StringProperty(required=False)
-    volume_validated = db.BooleanProperty(required=False)
+    volume = ndb.StringProperty(required=False)
+    volume_validated = ndb.BooleanProperty(required=False)
 
-    pages = db.StringProperty(required=False)
-    pages_validated = db.BooleanProperty(required=False)
+    pages = ndb.StringProperty(required=False)
+    pages_validated = ndb.BooleanProperty(required=False)
 
-    citation_validated = db.BooleanProperty(required=False)
+    citation_validated = ndb.BooleanProperty(required=False)
 
-    date = db.StringProperty(required=False)
-    date_validated = db.BooleanProperty(required=False)
+    date = ndb.StringProperty(required=False)
+    date_validated = ndb.BooleanProperty(required=False)
         
-    description = db.StringProperty(required=False)
-    description_validated = db.BooleanProperty(required=False)
+    description = ndb.StringProperty(required=False)
+    description_validated = ndb.BooleanProperty(required=False)
 
-    source_name = db.StringProperty(required=False)
-    source_name_validated = db.BooleanProperty(required=False)
-    source_uri = db.StringProperty(required=False)
-    source_uri_validated = db.BooleanProperty(required=False)        
-    source_validated = db.BooleanProperty(required=False)
+    source_name = ndb.StringProperty(required=False)
+    source_name_validated = ndb.BooleanProperty(required=False)
+    source_uri = ndb.StringProperty(required=False)
+    source_uri_validated = ndb.BooleanProperty(required=False)
+    source_validated = ndb.BooleanProperty(required=False)
                                    
-    abstract = db.StringProperty(required=False)
-    abstract_validated = db.BooleanProperty(required=False) 
+    abstract = ndb.TextProperty(required=False)
+    abstract_validated = ndb.BooleanProperty(required=False)
     
-    creators_list = db.ListProperty(basestring)
-    creators_list_validated = db.ListProperty(bool)
-    creators_uri_list = db.ListProperty(basestring)
-    creators_uri_list_validated = db.ListProperty(bool)
-    creators_validated = db.BooleanProperty(required=False)
+    creators = ndb.StructuredProperty(creator, repeated=True)
+    creators_validated = ndb.BooleanProperty(required=False)
     
-    pdf = db.StringProperty(required=False)
-    pdf_validated = db.BooleanProperty(required=False)       
+    pdf = ndb.StringProperty(required=False)
+    pdf_validated = ndb.BooleanProperty(required=False)
 
-    full_text = db.StringProperty(required=False)
-    full_text_validated = db.BooleanProperty(required=False)               
+    full_text = ndb.StringProperty(required=False)
+    full_text_validated = ndb.BooleanProperty(required=False)
     
-    date_digitized = db.StringProperty(required=False)
-    date_digitized_validated = db.BooleanProperty(required=False)       
+    date_digitized = ndb.StringProperty(required=False)
+    date_digitized_validated = ndb.BooleanProperty(required=False)
 
-    rights_value = db.StringProperty(required=False)
-    rights_value_validated = db.BooleanProperty(required=False)
-    rights_holder = db.StringProperty(required=False)
-    rights_holder_validated = db.BooleanProperty(required=False)
-    rights_validated = db.BooleanProperty(required=False)       
+    rights_value = ndb.StringProperty(required=False)
+    rights_value_validated = ndb.BooleanProperty(required=False)
+    rights_holder = ndb.StringProperty(required=False)
+    rights_holder_validated = ndb.BooleanProperty(required=False)
+    rights_validated = ndb.BooleanProperty(required=False)
     
-    references_text = db.StringProperty(required=False)
-    references_text_validated = db.BooleanProperty(required=False)       
+    references_text = ndb.StringProperty(required=False)
+    references_text_validated = ndb.BooleanProperty(required=False)
 
-    language = db.StringProperty(required=False)
-    language_validated = db.BooleanProperty(required=False)    
+    language = ndb.StringProperty(required=False)
+    language_validated = ndb.BooleanProperty(required=False)
 
-    type = db.StringProperty(required=False)
-    type_validated = db.BooleanProperty(required=False) 
+    type = ndb.StringProperty(required=False)
+    type_validated = ndb.BooleanProperty(required=False)
 
-    uri = db.StringProperty(required=False)
+    uri = ndb.StringProperty(required=False)
 
 class corpus_entity(db.Model):
     """The Google Datastore model for a Corpus."""

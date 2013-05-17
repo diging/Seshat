@@ -81,14 +81,37 @@ class interface:
         interface = Datasources.mendeley.data()
         response = interface.start(user.user_id())    # If there is no key for this user, will return an auth_url and generic_key for a request token.
         
-        if response is None:    # Display a list of folders to choose from.
-            folders = interface.list_folders()
-            return str(len(folders))
+        if response is None:
+            
+            if request.get('folder'):   # User has selected a folder. Prompt to proceed.
+                if request.get('proceed'):  # User has confirmed creation of corpus from folder. Create new corpus.
+                    papers = interface.get_papers(request.get('folder'))
+                    folder = [ f for f in interface.list_folders() if f['id'] == request.get('folder') ][0]
+                
+                    corpus = objects.Corpus(None, folder['name'])
+
+                    for paper in papers:
+                        paper.update()
+                        corpus.papers.append(str(paper.id))
+                        corpus.update()
+            
+                    return str(corpus.id)
+    
+                else:   # User has not confirmed creation of corpus from folder.
+                    self.template_values['folder_id'] = request.get('folder')
+                    template_file = "add_corpus_mendeley_folders_prompt.html"
+
+            else:   # User has not selected a folder. Display a list of folders to choose from.
+                self.template_values['folders'] = interface.list_folders()
+                template_file = "add_corpus_mendeley_folders.html"
+    
         else:   # User needs to authorize Seshat to access their account.
             self.template_values['auth_url'] = response[0]
             self.template_values['request_token_key'] = response[1]
-            return unicode(template.render(config.template_path + "mendeley_auth.html", self.template_values))
+            template_file = "mendeley_auth.html"
             
+        return unicode(template.render(config.template_path + template_file, self.template_values))
+    
     def authorize_mendeley_post(self, user, request, id=None):
         """Receives authorization requests from the authorization page, and returns result."""
         

@@ -21,7 +21,6 @@ class FileHandler(blobstore_handlers.BlobstoreDownloadHandler):
         blob_info = blobstore.BlobInfo.get(key)
         self.send_blob(blob_info)
 
-
 def main():
     pass
 

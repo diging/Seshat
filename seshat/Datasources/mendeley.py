@@ -68,23 +68,13 @@ class data:
     
     def list_folders(self):
         """Return a list of folders in a user's Mendeley library."""
-        
-        FoldersResponse = client.folders()
-        
-        FoldersList = []
 
-        for Folder in FoldersResponse:
-            CurrentFolder = {}
-            CurrentFolder['Id'] = Folder['id']
-            CurrentFolder['Name'] = Folder['name']
-            self.FoldersList.insert(len(FoldersList), CurrentFolder)
-
-        return self.FoldersList
+        return client.folders()
         
     def list_papers(self, FolderId):
-        """Return a list of all papers in a given folder in a user's Mendeley library. folder should probably be a URI?"""
+        """Return a list of all papers in a given folder in a user's Mendeley library."""
         
-        PapersListInFolder = self.mendeley.folder_documents(FolderId)
+        PapersListInFolder = client.folder_documents(FolderId)
         
         # Code to implement paging
         TotalPages = PapersListInFolder['total_pages']
@@ -95,7 +85,7 @@ class data:
         # Call the function for each page
         for i in range(0, TotalPages):
             PaperListInPage = []
-            PapersListInPage = self.mendeley.folder_documents(FolderId,page=i)
+            PapersListInPage = client.folder_documents(FolderId,page=i)
             PaperList = PapersListInPage['document_ids']
             for Paper in PaperList:
                 PapersListInFolder.insert(len(PapersListInFolder),Paper)
@@ -104,21 +94,20 @@ class data:
         return PapersListInFolder
         
     def get_paper(self, paper):
-        """Return a Seshat Paper object based on the available fields in a given paper. paper should probably be a URI?"""
-        
-
-        ResponseFromMendeley = self.mendeley.document_details(paper)
-        
-        #PaperObject = Paper()
-                
-        return ResponseFromMendeley
+        return client.document_details(paper)
         
     def get_pdf(self, paper):
         """Check whether a PDF is available for a given paper, and if so download it and save it to disk."""
-        
-        # Return the path to the file, or False if no PDF is available.
-        
-        
+    
+        paper_details = self.get_paper(paper)
+
+        try:
+            pdf = client.download_file(paper, paper_details['files'][0]['file_hash'])
+            blob = objects.db_factory.produce("Blob")   # For storing the pdf
+            key = blob.write(pdf['data'], "application/pdf")
+            return config.seshat_home + "/file/" + str(key)
+        except IndexError:
+            return None
 
     def get_papers(self, folder):
         """Return a list of Seshat Paper objects, given a folder in the user's Mendely library. Each Paper should have as many of the fields filled as possible, and should have a PDF."""
@@ -129,7 +118,7 @@ class data:
         for CurrentPaperId in ListOfPaperIds:
             CurrentPaperResultFromMendeley = self.get_paper(CurrentPaperId)
             CurrentPaperObject = self.getPaperObject(CurrentPaperResultFromMendeley)
-            ListOfPaperObjects.insert(len(ListOfPaperObjects),CurrentPaperObject)
+            ListOfPaperObjects.append(CurrentPaperObject)
         
         return ListOfPaperObjects
         
@@ -137,46 +126,45 @@ class data:
     
     def getPaperObject(self, PaperResult):
         """Get the result from get_paper() and return a Paper Seshat object corresponding to the input."""
+        
         CurrentPaper = objects.Paper()
         
-        if 'title' in PaperResult.keys():
-            CurrentPaper.title = (PaperResult['title'], True)
-            
-        if 'year' in PaperResult.keys():
-            CurrentPaper.date = (PaperResult['year'], True)
-            
-        if 'abstract' in PaperResult.keys():
-            CurrentPaper.abstract = (PaperResult['abstract'], True)
-            
-        if 'mendeley_url' in PaperResult.keys():
-            CurrentPaper.pdf = (PaperResult['mendeley_url'], True)
-            
-        if 'published_in' in PaperResult.keys():
-            CurrentPaper.citation[0]['journal'] = (PaperResult['published_in'], True)
-            
-        if 'volume' in PaperResult.keys():
-            CurrentPaper.citation[0]['volume'] = (PaperResult['volume'], True)
-            
-        if 'pages' in PaperResult.keys():
-            CurrentPaper.citation[0]['pages'] = (PaperResult['pages'], True)
+        try: CurrentPaper.title = (PaperResult['title'], True)
+        except KeyError: pass
+        try: CurrentPaper.date = (PaperResult['year'], True)
+        except KeyError: pass
+        try: CurrentPaper.abstract = (PaperResult['abstract'], True)
+        except KeyError: pass
+        
+        pdf_url = self.get_pdf(PaperResult['id'])
+        if pdf_url is not None:
+            CurrentPaper.pdf = (pdf_url, True)
+        else:
+            CurrentPaper.pdf = ("", False)
+        
+        try: CurrentPaper.citation[0]['journal'] = (PaperResult['published_in'], True)
+        except KeyError: pass
+        try: CurrentPaper.citation[0]['volume'] = (PaperResult['volume'], True)
+        except KeyError: pass
+        try: CurrentPaper.citation[0]['pages'] = (PaperResult['pages'], True)
+        except KeyError: pass
+
         
         CurrentPaper.source[0]['source'] = ("Mendeley", True)
         
-        if 'mendeley_url' in PaperResult.keys():
-            CurrentPaper.source[0]['uri'] = (PaperResult['mendeley_url'], True)        
-
-               
-        ListOfAuthors = []
+        try: CurrentPaper.source[0]['uri'] = (PaperResult['mendeley_url'], True)
+        except KeyError: pass
         
-        if 'authors' in PaperResult.keys():
+        CurrentPaper.creators = ([], True)
+        try:
             for CurrentAuthor in PaperResult['authors']:
-                AuthorInstance = CurrentPaper.creators[0][0];
-                AuthorInstance['name'] = (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], True)
-                ListOfAuthors.insert(len(ListOfAuthors), AuthorInstance)
-            CurrentPaper.creators = (ListOfAuthors, True)
-        
-        return CurrentPaper;
-        
+                CurrentPaper.creators[0].append({
+                                                    'name': (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], True),
+                                                    'uri': ('', False)
+                                                })
+        except KeyError: pass
+
+        return CurrentPaper
         
 def main():
     print "Nothing to see here."

@@ -310,22 +310,6 @@ class MendeleyClient(object):
         for method, details in apidefinitions.methods.items():
             setattr(self, method, MendeleyRemoteMethod(details, self._api_request))
 
-    # replace the upload_pdf with a more user friendly method
-    def upload_pdf(self,document_id, filename):
-
-        fp = open(filename, 'rb')
-        data = fp.read()
-
-        hasher = hashlib.sha1()
-        hasher.update(data)
-        sha1_hash = hasher.hexdigest()
-
-        return self._upload_pdf(document_id,
-                            file_name=os.path.basename(filename),
-                            sha1_hash=sha1_hash,
-                            oauth_body_hash=sha1_hash,
-                            data=data)
-
     def _api_request(self, url, access_token_required = False, method='get', params=None):
         if params == None:
             params = {}
@@ -376,36 +360,3 @@ class MendeleyClient(object):
         print 'Go to the following url to auth the token:\n%s' % (auth_url,)
         verifier = raw_input('Enter verification code: ')
         self.set_access_token(self.verify_auth(request_token, verifier))
-
-
-def create_client(config_file="config.json", keys_file=None, account_name="test_account"):
-    # Load the configuration file
-    config = MendeleyClientConfig(config_file)
-    if not config.is_valid():
-        print "Please edit config.json before running this script"
-        sys.exit(1)
-
-    # create a client and load tokens from the pkl file
-    host = "api.mendeley.com"
-    if hasattr(config, "host"):
-        host = config.host
-
-    if not keys_file:
-        keys_file = "keys_%s.pkl"%host
-
-    client = MendeleyClient(config.api_key, config.api_secret, {"host":host})
-    tokens_store = MendeleyTokensStore(keys_file)
-
-    # configure the client to use a specific token
-    # if no tokens are available, prompt the user to authenticate
-    access_token = tokens_store.get_access_token(account_name)
-    if not access_token:
-        try:
-            client.interactive_auth()
-            tokens_store.add_account(account_name,client.get_access_token())
-        except Exception as e:
-            print e
-            sys.exit(1)
-    else:
-        client.set_access_token(access_token)
-    return client

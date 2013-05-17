@@ -1,0 +1,30 @@
+<div id="content">
+    <p>You have selected the folder with ID {{ folder_id }}. Create new corpus?</p>
+    
+    <p id="status"></p>
+
+    <p>
+        <a href="{{ seshat_home }}/corpus/new?datasource=mendeley&folder={{ folder_id }}&proceed=true" id="proceed">Proceed</a>
+    </p>
+
+    <p id="home">
+        <a href="{{ seshat_home }}/corpus/new?datasource=mendeley">Take me back!</a>
+    </p>
+</div>
+
+<script>
+
+var waiting = false;
+
+$("#proceed").on("click", function(e) {
+    if (waiting) {
+        e.preventDefault();
+    } else {
+        waiting = true;
+        $("#status").text("Loading, please wait...").css("font-weight", "bold");
+        $("#home").html("");
+        $(this).html("");
+    }
+});
+
+</script>

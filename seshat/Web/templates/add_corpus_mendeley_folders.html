@@ -1,0 +1,27 @@
+<div id="content">
+    <table id="folders">
+        <tr class="head">
+            <td>Folder Name</td>
+            <td>Papers</td>
+            <td></td>
+        </tr>
+        {% for folder in folders %}
+            {% if folder.parent == -1 %}
+        <tr id="{{folder.id }}">
+            <td>{{ folder.name }}</td>
+            <td>{{ folder.size }}</td>
+            <td><a href="{{ seshat_home }}/corpus/new?datasource=mendeley&folder={{ folder.id }}">Select</a></td>
+        </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>
+
+{% for folder in folders %}
+    {% if folder.parent != -1 %}
+<script>
+$("#{{ folder.parent }}").after("<tr id='{{ folder.id }}'><td style='padding-left: 30px;'>{{ folder.name }}</td><td>{{ folder.size }}</td><td><a href='{{ seshat_home }}/corpus/new?datasource=mendeley&folder={{ folder.id }}'>Select</a></td></tr>");
+
+</script>
+    {% endif %}
+{% endfor %}
