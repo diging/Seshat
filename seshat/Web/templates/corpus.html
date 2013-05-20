@@ -16,7 +16,9 @@
                 </div>
             </td>
             <td class="file" id="file_pdf">
+                {% if paper.data.pdf.0 %}<a href="{{ paper.data.pdf.0 }}" target="_blank">{% endif %}
                 <div id="{{paper.id}}" field= "pdf" class="file_upload {% if paper.data.pdf.0 %}exists{% else %}missing{% endif %} center"> </div>
+                {% if paper.data.pdf.0 %}</a>{% endif %}
             </td>
             <td class="file" id="file_full_text">
                 <div id="{{paper.id}}" field= "full_text" class="file_upload {% if paper.data.full_text.0 %}exists{% else %}missing{% endif %} center"> </div>
@@ -31,26 +33,6 @@
 
     </table>
 
-    <!--
-    <script>
-    file_links = function(paper) {
-        
-    }
-
-    {% for paper in papers %}
-        var checked = Array();
-        {% for field in paper.checked %}
-            checked.push('{{field}}');
-        {% endfor %}
-        $('#{{paper.id}} .file').each(function(index) {
-            if ($.inArray($(this).attr("value"), checked) > -1) {
-                $(this).html('File Uploaded');
-            } else {
-                $(this).html('<a href="/bitstream/add/{{paper.id}}/'+ $(this).attr("id") +'">Add File</a>');
-            }
-        });
-    {% endfor %}
-    </script> -->
 </div>
 
 <script>
@@ -89,7 +71,7 @@ function noopHandler(e) {
 }
 
 // Called when a user drops a file onto a selected div.
-function handleFile(file, paper_id, field) {
+function handleFile(file, element, paper_id, field) {
     
     // Get an upload URL.
     var request = $.ajax({
@@ -123,6 +105,9 @@ function handleFile(file, paper_id, field) {
                             validated: true
                         }
             });
+            
+            // Wrap drag-area with link to file.
+            $(element).wrap("<a href='"+file_url+"' target='_blank' />");
         });
     });
 }
@@ -141,7 +126,7 @@ $(".file_upload").on("dragover", function(e) {
 
 // Listen for file-droppage action.
 $(".file_upload").on("drop", function(e) {
-    handleFile(e.dataTransfer.files[0], this.id, $(this).attr("field"));
+    handleFile(e.dataTransfer.files[0], this, this.id, $(this).attr("field"));
     $(this).removeClass("hover");
     $(this).removeClass("missing");
     $(this).addClass("exists");

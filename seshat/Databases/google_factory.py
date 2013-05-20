@@ -103,18 +103,8 @@ class GooglePaper:
         self.entity.language, self.entity.language_validated = object.language
         self.entity.type, self.entity.type_validated = object.type
         self.entity.uri = object.uri
+        self.entity.creators = object.creators[0]
         self.entity.creators_validated = object.creators[1]
-        self.entity.creators = [ ( creator(
-                                                name=stringTuple(
-                                                                    value = c['name'][0],
-                                                                    validated = c['name'][1],
-                                                                ),
-                                                uri=stringTuple(
-                                                                    value = c['uri'][0],
-                                                                    validated = c['uri'][1],
-                                                                )
-                                            )
-                                  ) for c in object.creators[0] ]
 
         return self.entity.put().id()
 
@@ -227,7 +217,7 @@ class stringTuple(ndb.Model):
     value = ndb.StringProperty(required=False)
     validated = ndb.BooleanProperty()
 
-class creator(ndb.Model):
+class GoogleCreator(ndb.Model):
     name = ndb.StructuredProperty(stringTuple)
     uri = ndb.StructuredProperty(stringTuple, required=False)
 
@@ -263,7 +253,7 @@ class paper_entity(ndb.Model):
     abstract = ndb.TextProperty(required=False)
     abstract_validated = ndb.BooleanProperty(required=False)
     
-    creators = ndb.StructuredProperty(creator, repeated=True)
+    creators = ndb.StructuredProperty(GoogleCreator, repeated=True)
     creators_validated = ndb.BooleanProperty(required=False)
     
     pdf = ndb.StringProperty(required=False)
