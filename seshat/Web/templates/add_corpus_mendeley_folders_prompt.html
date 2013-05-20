@@ -21,7 +21,7 @@ $("#proceed").on("click", function(e) {
         e.preventDefault();
     } else {
         waiting = true;
-        $("#status").text("Loading, please wait...").css("font-weight", "bold");
+        $("#status").text("Loading, please wait... (this might take a while for large corpora)").css("font-weight", "bold");
         $("#home").html("");
         $(this).html("");
     }

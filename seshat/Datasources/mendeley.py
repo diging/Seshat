@@ -8,7 +8,6 @@ import Resources.oauth2 as oauth
 import objects
 import time
 
-
 import Databases.factory_provider
 datafactory = Databases.factory_provider.get_factory()
 
