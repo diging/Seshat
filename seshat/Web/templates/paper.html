@@ -37,7 +37,7 @@ td.new_value {
 </table>
 
 <table width="1000">
-    {% for creator in creators %}
+    {% for creator in paper.creators.0 %}
     <tr>
         <td class="checkbox"><input type="checkbox" class="check" name="checked" value="creator_{{creator.0}}" /></td>
         <td class="field">dc.creator</td>

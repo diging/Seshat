@@ -21,6 +21,19 @@
             </tr>
             
             <tr>
+                <td colspan="2"class="region">Creators</td>
+                <td><input type="checkbox" class="input" name="creators.validated" {% if paper.creators.1 %}checked{% endif %} /></td>
+            </tr>
+            
+            {% for creator in paper.creators.0 %}
+            <tr>
+                <td></td>
+                <td><input name="creator_{{creator.name.0}}" class="input" type="text" value="{{creator.name.0}}"></td>
+                <td><input type="checkbox" class="input" name="creator_{{creator.name.0}}.validated" {% if creator.name.1 %}checked{% endif %} /></td>
+            </tr>
+            {% endfor %}
+            
+            <tr>
                 <td colspan="2"class="region">Citation</td>
                 <td><input type="checkbox" class="input" name="citation.validated" {% if paper.citation.1 %}checked{% endif %} /></td>
             </tr>

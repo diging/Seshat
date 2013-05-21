@@ -72,7 +72,12 @@ class GooglePaper:
                             'references_text': (self.entity.references_text, self.entity.references_text_validated),
                             'language': (self.entity.language, self.entity.language_validated),
                             'type': (self.entity.type, self.entity.type_validated),
-                            'creators': ([ creator for creator in self.entity.creators ], self.entity.creators_validated),
+                            'creators': ([ 
+                                            {
+                                                'name': (creator.name.value, creator.name.validated),
+                                                'uri': (creator.uri.value, creator.uri.validated)
+                                            }   
+                                                for creator in self.entity.creators ], self.entity.creators_validated),
                             'uri': self.entity.uri
                         }
                     
@@ -103,7 +108,14 @@ class GooglePaper:
         self.entity.language, self.entity.language_validated = object.language
         self.entity.type, self.entity.type_validated = object.type
         self.entity.uri = object.uri
-        self.entity.creators = object.creators[0]
+        try:
+            self.entity.creators = [ GoogleCreator (
+                                                        name=stringTuple(value=creator[0]['name'][0], validated=creator[0]['name'][1]),
+                                                        uri=stringTuple(value=creator[0]['uri'][0], validated=creator[0]['uri'][1])
+                                                    ) for creator in object.creators[0] ]
+        except KeyError:    # In case there are no authors.
+            pass
+        
         self.entity.creators_validated = object.creators[1]
 
         return self.entity.put().id()

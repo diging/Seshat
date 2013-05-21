@@ -154,11 +154,11 @@ class data:
         try: CurrentPaper.source[0]['uri'] = (PaperResult['mendeley_url'], True)
         except KeyError: pass
         
-        CurrentPaper.creators = ([], True)
+        CurrentPaper.creators = ([], False)
         try:
             for CurrentAuthor in PaperResult['authors']:
                 CurrentPaper.creators[0].append({
-                                                    'name': (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], True),
+                                                    'name': (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], False),
                                                     'uri': ('', False)
                                                 })
         except KeyError: pass
