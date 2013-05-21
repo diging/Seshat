@@ -1,21 +1,38 @@
-<html>
-    <head>
-        <title>Seshat: {{ values.title }}</title>
-        <script src="javascript/jquery-2.0.0.min.js"></script>
-        <script src="javascript/dropzone.js"></script>
-        <link href="css/style.css" rel="stylesheet"></link>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Seshat: {{ values.title }}</title>
+	<script src="javascript/jquery-2.0.0.min.js"></script>
+	<script src="javascript/dropzone.js"></script>
+	
+	
+	<link rel="stylesheet" href="css/styles.css" type="text/css" />
+	<!--
+	enterprise, a free CSS web template by ZyPOP (zypopwebtemplates.com/)
 
-    </head>
-    
-    <body>
+	Download: http://zypopwebtemplates.com/
+
+	License: Creative Commons Attribution
+	//-->
+</head>
+
+<body>
+<div class="wrapper">
+    <div id="container">
         <div id="header">
-            <div id="title"><h1 class="title">Seshat: {{ title }}</h1></div>
-            <div id="navigation">
-                <ul>
-                    {% if user_status != None %}<li>{{ user_status }} (<a href="{{ logout }}">Log out</a>)</li>
-                    {% else %}<li><a href="{{ login }}">Log in</a></li>
-                    {% endif %}
-                </ul>
-            </div>
+            <h1><a href="/">Seshat</a></h1>
+            <h2>Corpus Management Tool</h2>
         </div>
-        
+        <div id="nav"> 
+            <ul>     
+                <li><a href="{{ seshat_home }}/">Home</a></li>
+               	<li><a href="{{ seshat_home }}/corpus/new">Import</a></li>
+                <li><a href="{{ seshat_home }}/corpus">Manage</a></li>
+                <li><a href="#">Export</a></li>
+                <li>{% if user_status != None %}<a href="{{ logout }}">Log out</a>{% else %}<a href="{{ login }}">Log in</a>{% endif %}</li>
+            </ul>
+        </div>
+                <div id="page-intro">ASDF.
+        </div>
+        <div id="body">

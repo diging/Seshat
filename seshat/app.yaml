@@ -8,6 +8,8 @@ handlers:
   static_dir: Web/templates/css
 - url: .*/javascript
   static_dir: Web/templates/javascript
+- url: .*/images
+  static_dir: Web/templates/images
   
 - url: .*
   script: main.py

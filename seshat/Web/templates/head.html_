@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>Seshat: {{ values.title }}</title>
+        <script src="javascript/jquery-2.0.0.min.js"></script>
+        <script src="javascript/dropzone.js"></script>
+        <link href="css/style.css" rel="stylesheet"></link>
+
+    </head>
+    
+    <body>
+        <div id="header">
+            <div id="title"><h1 class="title">Seshat: {{ title }}</h1></div>
+            <div id="navigation">
+                <ul>
+                    {% if user_status != None %}<li>{{ user_status }} (<a href="{{ logout }}">Log out</a>)</li>
+                    {% else %}<li><a href="{{ login }}">Log in</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
