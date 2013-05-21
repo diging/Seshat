@@ -74,6 +74,7 @@ class GooglePaper:
                             'type': (self.entity.type, self.entity.type_validated),
                             'creators': ([ 
                                             {
+                                                'creator_id': creator.creator_id,
                                                 'name': (creator.name.value, creator.name.validated),
                                                 'uri': (creator.uri.value, creator.uri.validated)
                                             }   
@@ -108,13 +109,14 @@ class GooglePaper:
         self.entity.language, self.entity.language_validated = object.language
         self.entity.type, self.entity.type_validated = object.type
         self.entity.uri = object.uri
-        try:
-            self.entity.creators = [ GoogleCreator (
-                                                        name=stringTuple(value=creator[0]['name'][0], validated=creator[0]['name'][1]),
-                                                        uri=stringTuple(value=creator[0]['uri'][0], validated=creator[0]['uri'][1])
-                                                    ) for creator in object.creators[0] ]
-        except KeyError:    # In case there are no authors.
-            pass
+        #try:
+        self.entity.creators = [ GoogleCreator (
+                                                    creator_id=creator[0]['creator_id'],
+                                                    name=stringTuple(value=creator[0]['name'][0], validated=creator[0]['name'][1]),
+                                                    uri=stringTuple(value=creator[0]['uri'][0], validated=creator[0]['uri'][1])
+                                                ) for creator in object.creators[0] ]
+        #except KeyError:    # In case there are no authors.
+         #   pass
         
         self.entity.creators_validated = object.creators[1]
 
@@ -225,11 +227,13 @@ class GoogleBlob:
         files.finalize(self.file_name)
         return files.blobstore.get_blob_key(self.file_name)
 
+
 class stringTuple(ndb.Model):
     value = ndb.StringProperty(required=False)
     validated = ndb.BooleanProperty()
 
 class GoogleCreator(ndb.Model):
+    creator_id = ndb.StringProperty()
     name = ndb.StructuredProperty(stringTuple)
     uri = ndb.StructuredProperty(stringTuple, required=False)
 

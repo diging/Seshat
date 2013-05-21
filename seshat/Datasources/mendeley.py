@@ -135,7 +135,9 @@ class data:
         try: CurrentPaper.abstract = (PaperResult['abstract'], True)
         except KeyError: pass
         
-        pdf_url = self.get_pdf(PaperResult['id'])
+        
+        #pdf_url = self.get_pdf(PaperResult['id'])
+        pdf_url = None
         if pdf_url is not None:
             CurrentPaper.pdf = (pdf_url, True)
         else:
@@ -155,13 +157,17 @@ class data:
         except KeyError: pass
         
         CurrentPaper.creators = ([], False)
-        try:
-            for CurrentAuthor in PaperResult['authors']:
-                CurrentPaper.creators[0].append({
-                                                    'name': (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], False),
-                                                    'uri': ('', False)
-                                                })
-        except KeyError: pass
+        a = 0
+        #try:
+        print a
+        for CurrentAuthor in PaperResult['authors']:
+            a += 1
+            CurrentPaper.creators[0].append({
+                                                'creator_id': str(a),
+                                                'name': (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], False),
+                                                'uri': ('', False)
+                                            })
+        #except KeyError: pass
 
         return CurrentPaper
         
