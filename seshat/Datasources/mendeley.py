@@ -120,8 +120,6 @@ class data:
             ListOfPaperObjects.append(CurrentPaperObject)
         
         return ListOfPaperObjects
-        
-        # Return a list of Seshat Paper objects.    
     
     def getPaperObject(self, PaperResult):
         """Get the result from get_paper() and return a Paper Seshat object corresponding to the input."""
@@ -135,13 +133,18 @@ class data:
         try: CurrentPaper.abstract = (PaperResult['abstract'], True)
         except KeyError: pass
         
+        pdf_loaded = False
         
-        #pdf_url = self.get_pdf(PaperResult['id'])
-        pdf_url = None
-        if pdf_url is not None:
-            CurrentPaper.pdf = (pdf_url, True)
-        else:
-            CurrentPaper.pdf = ("", False)
+        while not pdf_loaded:
+            try:
+                pdf_url = self.get_pdf(PaperResult['id'])
+                if pdf_url is not None:
+                    CurrentPaper.pdf = (pdf_url, True)
+                else:
+                    CurrentPaper.pdf = ("", False)
+                pdf_loaded = True
+            except:
+                pass
         
         try: CurrentPaper.citation[0]['journal'] = (PaperResult['published_in'], True)
         except KeyError: pass
@@ -156,19 +159,10 @@ class data:
         try: CurrentPaper.source[0]['uri'] = (PaperResult['mendeley_url'], True)
         except KeyError: pass
         
-        CurrentPaper.creators = ([], False)
-        a = 0
-        #try:
-        print a
-        for CurrentAuthor in PaperResult['authors']:
-            a += 1
-            CurrentPaper.creators[0].append({
-                                                'creator_id': str(a),
+        CurrentPaper.creators = ([{
                                                 'name': (CurrentAuthor['surname'] + ', ' + CurrentAuthor['forename'], False),
                                                 'uri': ('', False)
-                                            })
-        #except KeyError: pass
-
+                                            } for CurrentAuthor in PaperResult['authors'] ], False)
         return CurrentPaper
         
 def main():

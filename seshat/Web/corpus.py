@@ -61,10 +61,6 @@ class interface:
         
         return unicode(template.render(config.template_path + "corpus.html", self.template_values))
 
-    def update(self, user, request, id):
-        """Update an existing corpus."""
-        pass
-
     def new(self, user, request, source=None):
         """Provide the interface for creating a new corpus."""
         
@@ -85,17 +81,24 @@ class interface:
             
             if request.get('folder'):   # User has selected a folder. Prompt to proceed.
                 if request.get('proceed'):  # User has confirmed creation of corpus from folder. Create new corpus.
-                    papers = interface.get_papers(request.get('folder'))
-                    folder = [ f for f in interface.list_folders() if f['id'] == request.get('folder') ][0]
+#                    papers = interface.get_papers(request.get('folder'))
+                    papers = interface.list_papers(request.get('folder'))   # List of Mendeley paper IDs
+                    folder = [ f for f in interface.list_folders() if f['id'] == request.get('folder') ][0]     # Get the name of the folder.
                 
                     corpus = objects.Corpus(None, folder['name'])
-
-                    for paper in papers:
-                        paper.update()
-                        corpus.papers.append(str(paper.id))
-                        corpus.update()
+                    corpus.update()
+                    
+                    template_file = "add_corpus_mendeley_do.html"
+                    self.template_values['papers'] = papers
+                    self.template_values['folder'] = request.get('folder')
+                    self.template_values['corpus'] = corpus.id
+                    
+#                    for paper in papers:
+#                        paper.update()
+#                        corpus.papers.append(str(paper.id))
+#                        corpus.update()
             
-                    return str(corpus.id)
+                    #return str(corpus.id)
     
                 else:   # User has not confirmed creation of corpus from folder.
                     self.template_values['folder_id'] = request.get('folder')
@@ -112,6 +115,49 @@ class interface:
             
         return unicode(template.render(config.template_path + template_file, self.template_values))
     
+    def test(self, user, request, id=None):
+        interface = Datasources.mendeley.data()
+        response = interface.start(user.user_id())
+        
+        id = request.get("id")
+#        paper = interface.get_paper(id)
+
+#        print paper['authors'][0]['surname']
+        paper = interface.getPaperObject(interface.get_paper(id))
+        paper.update()
+        print paper.id
+        
+    
+    def new_paper_from_mendeley_post(self, user, request, id=None):
+        """Receives a Mendeley paper id, creates a new Paper, and returns its ID. If not ID given, returns None."""
+        
+        interface = Datasources.mendeley.data()
+        response = interface.start(user.user_id())
+        
+        id = request.get("id")
+        if id is not None:
+            paper = interface.getPaperObject(interface.get_paper(id))
+            paper.update()
+            
+            return '{ "title": "'+ paper.title[0] +'", "pdf_url": "' + paper.pdf[0] + '", "id": "' + str(paper.id) + '" }'
+        return None
+            
+    def update_post(self, user, request, id=None):
+        """Receives a Corpus id and instructions to add or remove a paper (given requests.get("do") and requests.get("id")), and returns true. If no id given, returns false."""
+        
+        id = request.get("id")
+        if id is not None:
+            corpus = objects.Corpus(id)
+            paper = request.get("paper")
+            if request.get("do") == "add":  # Don't want duplicate entries.
+                corpus.papers.append(paper)
+            elif request.get("do") == "remove":
+                try: corpus.papers.remove(paper)
+                except Error: pass  # Paper may not be in corpus.
+            corpus.update()
+            return True
+        return None
+            
     def authorize_mendeley_post(self, user, request, id=None):
         """Receives authorization requests from the authorization page, and returns result."""
         
@@ -168,6 +214,7 @@ class CorpusHandler(webapp2.RequestHandler):
                                     +   response
                                     +   unicode(template.render(config.template_path + "foot.html", {}))
                                     )
+            
             #except (TypeError, AttributeError):
                # self.response.out.write("No such function.")
         else:

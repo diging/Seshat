@@ -1,0 +1,86 @@
+<div id="content">
+
+    <table>
+        <tr>
+            <th>Paper</th>
+            <th>PDF</th>
+            <th>Loaded</th>
+        </tr>
+        
+        {% for paper in papers %}
+        
+        <tr id="{{ paper }}" class="paper">
+            <td id="{{ paper }}" class="id">{{ paper }}</td>
+            <td id="{{ paper }}" class="pdf">Loading...</td>
+            <td id="{{ paper }}" class="status">Loading...</td>
+        </tr>
+        
+        {% endfor %}
+        
+        
+    </table>
+    
+    <div id="next"></div>
+
+</div>
+
+<script>
+
+
+var loaded = {};
+var paper_id = {};
+var corpus_updated = {}
+
+$(".paper").each(function () {
+
+    var m_id = this.id;
+    
+    loaded[m_id] = false;       // Keeps track of which papers are successfully loaded.
+    corpus_updated[m_id] = false;
+         
+    $.post('{{seshat_home}}/corpus/new_paper_from_mendeley', { id: this.id }, function (response, ts, jq) {
+        var paper = $.parseJSON(response);
+        
+        // To update corpus.
+        paper_id[m_id] = paper.id;
+        
+        $("td#" + m_id + ".id").html(paper.title);
+        $("td#" + m_id + ".status").html("Done");
+        $("td#" + m_id + ".id").css("color", "green")
+        $("td#" + m_id + ".status").css("color", "green")
+        
+        // Not every paper will have a PDF attached to it.
+        if (paper.pdf_url != '') {
+            $("td#" + m_id + ".pdf").html("<a href='"+ paper.pdf_url + "' target='_blank'>Loaded</a>");
+            $("td#" + m_id + ".pdf").css("color", "green")
+        } else {
+            $("td#" + m_id + ".pdf").html("Not found");
+            $("td#" + m_id + ".pdf").css("color", "yellow")           
+        }                
+        
+        $.post('{{seshat_home}}/corpus/update', 
+            { 
+                id: "{{ corpus }}", 
+                do: "add", 
+                paper: paper.id
+            },
+            function (r, t, j) {
+                loaded[m_id] = true;
+                
+                // Check to see whether all papers have been loaded.
+                var done = true;
+                $.each(loaded, function(k, v) {
+                    if (v == false) {
+                        done = false;
+                    }
+                });
+                
+                if (done) {
+                    $("#next").html("<h3><a href='{{seshat_home}}/corpus/view/{{corpus}}' style='text-decoration:none;'>Proceed</a></h3>");
+                }
+            });
+    });
+});
+
+</script>
+

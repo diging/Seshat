@@ -99,18 +99,6 @@ class Paper(SeshatObject):
         self.uri = ""                        # This is the handle of the DSpace object, once ingested.
 
         self.start()
-    
-
-
-class Author(SeshatObject):
-    """An Author refers to a human who wrote something. Each object should refer to a concept in an authority, such as ConceptPower."""
-    
-    def __init__(self, id=None):
-        """Create a new author object. Since working with an author may involve creating new concepts in an authority, the class is initialized without a handle."""
-
-        self.start()
-        
-        self.name = ""
          
 class DSpace_Object(SeshatObject):
     """These are used to prepare papers for ingestion into a DSpace repository. This class is based on the metadata standards for the Digital HPS Community Repository, which is based on Dublin Core."""
@@ -149,6 +137,15 @@ class Token(SeshatObject):
     def __init__(self, id=None):
         self.id = id
 
+        self.start()
+
+class Generic(SeshatObject):
+    """A Generic object."""
+    
+    def __init__(self, generic_id=None):
+        self.id = None
+        self.generic_key = None
+        self.value = None
         self.start()
 
 class CorpusEdge(SeshatObject):
