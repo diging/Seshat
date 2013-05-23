@@ -159,6 +159,15 @@ class CorpusEdge(SeshatObject):
         self.Paper = paper
         
         self.start()
+        
+class AuthorMap(SeshatObject):
+    
+    def __init__(self, id=None):
+    
+        self.id = id
+        self.name = None    # The authoritative name of this author (should be LoC format, or thereabouts).
+        self.strings = []   # Strings that have corresponded to this author.
+        self.start()
 
 if __name__ == '__main__':
     status = main()

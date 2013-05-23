@@ -81,7 +81,6 @@ class interface:
             
             if request.get('folder'):   # User has selected a folder. Prompt to proceed.
                 if request.get('proceed'):  # User has confirmed creation of corpus from folder. Create new corpus.
-#                    papers = interface.get_papers(request.get('folder'))
                     papers = interface.list_papers(request.get('folder'))   # List of Mendeley paper IDs
                     folder = [ f for f in interface.list_folders() if f['id'] == request.get('folder') ][0]     # Get the name of the folder.
                 
@@ -92,13 +91,6 @@ class interface:
                     self.template_values['papers'] = papers
                     self.template_values['folder'] = request.get('folder')
                     self.template_values['corpus'] = corpus.id
-                    
-#                    for paper in papers:
-#                        paper.update()
-#                        corpus.papers.append(str(paper.id))
-#                        corpus.update()
-            
-                    #return str(corpus.id)
     
                 else:   # User has not confirmed creation of corpus from folder.
                     self.template_values['folder_id'] = request.get('folder')
@@ -115,17 +107,16 @@ class interface:
             
         return unicode(template.render(config.template_path + template_file, self.template_values))
     
-    def test(self, user, request, id=None):
-        interface = Datasources.mendeley.data()
-        response = interface.start(user.user_id())
+    def authors (self, user, request, id=None):
+        """Provides an interface to correct and validate authors across the entire corpus."""
         
-        id = request.get("id")
-#        paper = interface.get_paper(id)
+        corpus = objects.Corpus(id)        
+        papers = [ objects.Paper(p) for p in corpus.papers ]
 
-#        print paper['authors'][0]['surname']
-        paper = interface.getPaperObject(interface.get_paper(id))
-        paper.update()
-        print paper.id
+        authors = []
+#        for paper in papers:
+#            for author in paper.creators[0]:
+                
         
     
     def new_paper_from_mendeley_post(self, user, request, id=None):

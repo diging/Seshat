@@ -1,4 +1,6 @@
 <div id="content">
+    <h4><a href="{{seshat_home}}/corpus/authors/{{ corpus_id }}">Validate Authors</a></h4>
+
     <table width="900" id="corpus">
         <tr class="head">
             <th width="60%"></th>
@@ -21,10 +23,14 @@
                 {% if paper.data.pdf.0 %}</a>{% endif %}
             </td>
             <td class="file" id="file_full_text">
+                {% if paper.data.full_text.0 %}<a href="{{ paper.data.full_text.0 }}" target="_blank">{% endif %}
                 <div id="{{paper.id}}" field= "full_text" class="file_upload {% if paper.data.full_text.0 %}exists{% else %}missing{% endif %} center"> </div>
+                {% if paper.data.full_text.0 %}</a>{% endif %}
             </td>
             <td class="file" id="file_references_text">
+                {% if paper.data.references_text.0 %}<a href="{{ paper.data.references_text.0 }}" target="_blank">{% endif %}
                 <div id="{{paper.id}}" field= "references_text" class="file_upload {% if paper.data.references_text.0 %}exists{% else %}missing{% endif %} center"> </div>
+                {% if paper.data.references_text.0 %}</a>{% endif %}
             </td>
             
         </tr>

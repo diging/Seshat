@@ -3,16 +3,40 @@
 import requests
 import urllib2
 import sys
+import xml.etree.ElementTree as ET
 
-def searchWord(Word, Pos):
-    URL = "http://digitalhps-develop.asu.edu:8080/conceptpower/rest/ConceptLookup/"+Word+"/"+Pos+""
-    Proxy = "http://digitalhps-develop.asu.edu:8080" 
-    Data = urllib2.urlopen(URL).read()    
-    print Data
+vowels = ['a', 'e', 'i', 'o', 'u', 'y']
+
+class authority:
+
+    def __init__(self):
+        self.server = "http://chps.asu.edu/conceptpower/rest/"
+        
+    def search (self, query):
+        """Searches for word of type pos, and returns a list of tuples: (result, uri)."""
     
+        response = urllib2.urlopen(self.server+"ConceptLookup/"+query+"/Noun").read()
+        root = ET.fromstring(response)
+        if len(root) > 0:
+            return [ (elem[1].text, elem[0].text) for elem in root ]
+        return []
+
+    def suggest(self, word):
+        """Conducts a series of searches based on manipulations of word, and returns a list of word-uri suggestions."""
+
+        suggestions = []
+        word_split = word.split(",")
+
+        if len(word_split) > 1:     # Maybe of form: Last, First M.
+            suggestions += self.search(word_split[0])
+        else:
+            suggestions += self.search(word)  # Try at face-value.
+        
+        return suggestions
+
 def main():
-    print "Nothing to see here."
-    searchWord("Mike", "noun")
+    
+    print suggest("Bradshaw, Anthony")
 
 if __name__ == '__main__':
     status = main()

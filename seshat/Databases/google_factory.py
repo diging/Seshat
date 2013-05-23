@@ -28,6 +28,8 @@ class factory:
             return GoogleToken()
         if type == "Blob":
             return GoogleBlob()
+        if type == "AuthorMap":
+            return GoogleAuthorMap()
 
 class GooglePaper:
     """Maps Papers onto Google Datastore entities."""
@@ -223,6 +225,34 @@ class GoogleBlob:
         files.finalize(self.file_name)
         return files.blobstore.get_blob_key(self.file_name)
 
+class GoogleAuthorMap:
+    """Stores mappings from creator strings to recognized authors."""
+
+    def __init__(self):
+        self.entity = authormap_entity()
+
+    def load(self, id=None):
+
+        if id is not None:
+            key = db.Key.from_path("authormap_entity", int(id))
+            self.entity = db.get(key)
+            self.data = {
+                'name': self.entity.name,
+                'strings': self.entity.strings,
+                'uri': self.entity.uri
+            }
+            
+    def update(self, object):
+
+        self.entity.name = object.name
+        self.entity.strings = object.strings
+        self.entity.uri = object.uri
+        return self.entity.put().id()
+    
+class authormap_entity(db.Model):    
+    name = db.StringProperty()
+    strings = db.ListProperty(basestring)
+    uri = db.StringProperty()    
 
 class stringTuple(ndb.Model):
     value = ndb.StringProperty(required=False)

@@ -12,6 +12,7 @@ import Web.null
 import Web.main
 import Web.uploads
 import Web.file
+import Web.services
 
 import wsgiref.handlers
 from google.appengine.dist import use_library
@@ -30,6 +31,8 @@ def main():
         webapp2.Route(r'/paper/<id>/<do>', handler=Web.paper.PaperHandler),
         
         webapp2.Route(r'/file/<key>', handler=Web.file.FileHandler),
+
+        webapp2.Route(r'/service/conceptpower/<word>', handler=Web.services.ConceptPowerHandler),
         
         webapp2.Route(r'/upload', handler=Web.uploads.UploadHandler),
         webapp2.Route(r'/upload_path', handler=Web.uploads.UploadPathHandler),

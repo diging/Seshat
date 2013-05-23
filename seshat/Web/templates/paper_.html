@@ -26,10 +26,26 @@
             </tr>
             
             {% for creator in paper.creators.0 %}
+            <tr class="creator">
+                <td>Name</td>
+                <td><input name="name" class="input creator" type="text" value="{{creator.name.0}}"></td>
+                <td><input type="checkbox" class="input" name="validated" {% if creator.name.1 %}checked{% endif %}  disabled="disabled" /></td>
+            </tr>
             <tr>
-                <td></td>
-                <td><input name="creator_{{creator.name.0}}" class="input" type="text" value="{{creator.name.0}}"></td>
-                <td><input type="checkbox" class="input" name="creator_{{creator.name.0}}.validated" {% if creator.name.1 %}checked{% endif %} /></td>
+                <td>URI</td>
+                <td><input name="uri" class="input creator" type="text" value="{{creator.uri.0}}" disabled="disabled"></td>
+                <td><input type="checkbox" class="input" name="creator_{{creator.uri.0}}.validated" {% if creator.uri.1 %}checked{% endif %}  disabled="disabled" /></td>
+            </tr>
+            <tr>
+                <td>Suggestion</td>
+                <td>
+                    <select name="suggestion" class="input">
+                        <option value="none">None</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border-bottom: 1px solid gray;"></td>
             </tr>
             {% endfor %}
             
@@ -133,55 +149,51 @@
 <script>
 
     $(".input").on('change', function(e) {
-        if (this.type == "checkbox") {
-            var value = this.checked;
-            if (value) {
-                var validated = value;
-            } else {
-                var validated = '';
+        if ($(this).hasClass("creator") ) {
+            if ($(this).attr("name") == "name") {
+                console.log( $(this).attr("name"));
+                // Get suggestions
+                $.get('{{seshat_home}}/service/conceptpower/' + $(this).attr("value"), function(data) {
+                    console.log(data);
+                });
+                // Write suggestions to select list
+            } else if ($(this).attr("name") == "suggestions") {
+                // Populate name and URI.
+                
+                // Set validated to true.
+                
+                // Send all creators to update paper.
             }
         } else {
-            var value = this.value;
-            var validated = true;
-            $("[name='" + this.name + ".validated']").prop('checked', true);
-        }
         
-        var data = {
-            field: this.name,
-            value: value,
-            validated: validated
-        }
-        var request = $.ajax({
-            url: "{{paper.id}}/update",
-            type: "post",
-            data: data
-        });
-        
-        request.done(function (resonse, textStatus, jqXHR) {
-            console.log(resonse);
-        });
-    
-        
-/*        var path = this.name.split(".");
-        if (path[path.length - 1] == 'validated') {
-            field = path[path.length - 2];
-            if (path.length > 2) {
-                var parent = path[path.length - 3];
+            if (this.type == "checkbox") {
+                var value = this.checked;
+                if (value) {
+                    var validated = value;
+                } else {
+                    var validated = '';
+                }
             } else {
-                var parent = "None";
+                var value = this.value;
+                var validated = true;
+                $("[name='" + this.name + ".validated']").prop('checked', true);
             }
-        } else {
-            if (path.length > 1) {
-                var parent = path[path.length - 2];
-            } else {
-                var parent = "None";
+            
+            var data = {
+                field: this.name,
+                value: value,
+                validated: validated
             }
+            var request = $.ajax({
+                url: "{{paper.id}}/update",
+                type: "post",
+                data: data
+            });
+            
+            request.done(function (resonse, textStatus, jqXHR) {
+                console.log(resonse);
+            });
         }
-        if (this.type == "checkbox") {
-            var value = this.checked;
-        } else {
-            var value = this.value;
-        }*/
     });
     
     // Apply the value of this field to the entire corpus.
