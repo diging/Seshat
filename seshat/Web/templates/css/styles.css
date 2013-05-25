@@ -535,6 +535,12 @@ div#footer-links p {
 .input {
 	width: 500px;
 }
+.input[name=name] {
+	width: 480px;
+}
+button[name=check] {
+	margin-left: 5px;
+}
 .input[name=description] {
 	height: 80px;
 }
@@ -543,6 +549,25 @@ div#footer-links p {
 }
 
 input[type=checkbox] {
+	height: 30px;
+	width: 30px;
+}
+
+
+.creator {
+	width: 500px;
+}
+.creator[name=name] {
+	width: 480px;
+}
+.creator[name=description] {
+	height: 80px;
+}
+.creator[name=abstract] {
+	height: 80px;
+}
+
+.creator[type=checkbox] {
 	height: 30px;
 	width: 30px;
 }

@@ -11,6 +11,7 @@ from google.appengine.ext import ndb
 from google.appengine.ext import webapp
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
+import math
 
 class factory:
     """A factory that produces database-linked objects."""
@@ -76,7 +77,7 @@ class GooglePaper:
                             'type': (self.entity.type, self.entity.type_validated),
                             'creators': ([ 
                                             {
-                                                'creator_id': creator.creator_id,
+                                                'key': str(hash(creator.name.value)*-1),
                                                 'name': (creator.name.value, creator.name.validated),
                                                 'uri': (creator.uri.value, creator.uri.validated)
                                             }   

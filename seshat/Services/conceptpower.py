@@ -14,7 +14,9 @@ class authority:
         
     def search (self, query):
         """Searches for word of type pos, and returns a list of tuples: (result, uri)."""
-    
+        
+        query = query.replace(" ", "%20")
+#        sys.exit(query)
         response = urllib2.urlopen(self.server+"ConceptLookup/"+query+"/Noun").read()
         root = ET.fromstring(response)
         if len(root) > 0:
@@ -28,6 +30,7 @@ class authority:
         word_split = word.split(",")
 
         if len(word_split) > 1:     # Maybe of form: Last, First M.
+            suggestions += self.search(word_split[1] + " " + word_split[0])
             suggestions += self.search(word_split[0])
         else:
             suggestions += self.search(word)  # Try at face-value.

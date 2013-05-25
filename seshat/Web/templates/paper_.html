@@ -26,20 +26,20 @@
             </tr>
             
             {% for creator in paper.creators.0 %}
-            <tr class="creator">
+            <tr class="creator" id="{{creator.key}}">
                 <td>Name</td>
-                <td><input name="name" class="input creator" type="text" value="{{creator.name.0}}"></td>
-                <td><input type="checkbox" class="input" name="validated" {% if creator.name.1 %}checked{% endif %}  disabled="disabled" /></td>
+                <td><input name="name" class="creator" type="text" id="{{creator.key}}" value="{{creator.name.0}}" /><button type="button" name="check" id="{{creator.key}}">Go</button></td>
+                <td><input type="checkbox" class="creator" name="validated" {% if creator.name.1 %}checked{% endif %}  disabled="disabled" /></td>
             </tr>
             <tr>
                 <td>URI</td>
-                <td><input name="uri" class="input creator" type="text" value="{{creator.uri.0}}" disabled="disabled"></td>
-                <td><input type="checkbox" class="input" name="creator_{{creator.uri.0}}.validated" {% if creator.uri.1 %}checked{% endif %}  disabled="disabled" /></td>
+                <td><input name="uri" class="creator" type="text" value="{{creator.uri.0}}" disabled="disabled"></td>
+                <td><input type="checkbox" class="creator" name="creator_{{creator.uri.0}}.validated" {% if creator.uri.1 %}checked{% endif %}  disabled="disabled" /></td>
             </tr>
             <tr>
                 <td>Suggestion</td>
                 <td>
-                    <select name="suggestion" class="input">
+                    <select name="suggestion" class="creator suggestion" id="select_{{creator.key}}">
                         <option value="none">None</option>
                     </select>
                 </td>
@@ -148,52 +148,67 @@
 
 <script>
 
-    $(".input").on('change', function(e) {
-        if ($(this).hasClass("creator") ) {
-            if ($(this).attr("name") == "name") {
-                console.log( $(this).attr("name"));
-                // Get suggestions
-                $.get('{{seshat_home}}/service/conceptpower/' + $(this).attr("value"), function(data) {
-                    console.log(data);
+    // Just for creator fields.
+    $(".creator").on('change', function(e) {
+        if ($(this).attr("name") == "name") {
+            var creator_key = $(this).prop("id");
+            // Get suggestions
+            $.get('{{seshat_home}}/service/conceptpower/' + $(this).val(), function(data) {
+                var jdata = $.parseJSON(data);
+                $("#select_" + creator_key.toString()).html("");   // Get rid of the "None" option.
+                
+                // Write suggestions as options in select list
+                $.each(jdata, function(key, value) {
+                    $("#select_" + creator_key.toString())
+                        .append($("<option></option>")
+                        .attr("value", value.uri)
+                        .text(value.name));
                 });
-                // Write suggestions to select list
-            } else if ($(this).attr("name") == "suggestions") {
-                // Populate name and URI.
-                
-                // Set validated to true.
-                
-                // Send all creators to update paper.
+            });
+        } else if ($(this).attr("name") == "suggestion") {
+
+            // Populate name and URI.
+            
+            // Set validated to true.
+            
+            // Send all creators to update paper.
+        }
+    });
+    
+    $("button[name='check']").on("click", function (e) {
+        console.log($(this).prop("id"));
+        $("input#"+ $(this).prop("id").toString() + "[name='name']").trigger("change");
+    });
+
+    // Everything other than creators.
+    $(".input").on('change', function(e) {        
+        if (this.type == "checkbox") {
+            var value = this.checked;
+            if (value) {
+                var validated = value;
+            } else {
+                var validated = '';
             }
         } else {
-        
-            if (this.type == "checkbox") {
-                var value = this.checked;
-                if (value) {
-                    var validated = value;
-                } else {
-                    var validated = '';
-                }
-            } else {
-                var value = this.value;
-                var validated = true;
-                $("[name='" + this.name + ".validated']").prop('checked', true);
-            }
-            
-            var data = {
-                field: this.name,
-                value: value,
-                validated: validated
-            }
-            var request = $.ajax({
-                url: "{{paper.id}}/update",
-                type: "post",
-                data: data
-            });
-            
-            request.done(function (resonse, textStatus, jqXHR) {
-                console.log(resonse);
-            });
+            var value = this.value;
+            var validated = true;
+            $("[name='" + this.name + ".validated']").prop('checked', true);
         }
+        
+        var data = {
+            field: this.name,
+            value: value,
+            validated: validated
+        }
+        var request = $.ajax({
+            url: "{{paper.id}}/update",
+            type: "post",
+            data: data
+        });
+        
+        request.done(function (resonse, textStatus, jqXHR) {
+            console.log(resonse);
+        });
     });
     
     // Apply the value of this field to the entire corpus.
