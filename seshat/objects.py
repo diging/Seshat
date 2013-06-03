@@ -76,12 +76,9 @@ class Paper(SeshatObject):
                             }
                         , False)
         self.abstract = ("", False)
-        self.creators = ([ 
-                            {                           # There should be an object of this format for each author. Validation occurs for each author name and author URI.
-                                'name': ("", False),    # The plain-text name, e.g. "Smith, John Q."
-                                'uri': ("", False)      # A URI for an entry in an authority file, e.g. http://www.digitalhps.org/concepts/WID-02374451-N-??-horse
-                            }
-                        ], False)                       # Validation should also occur for the author list as a whole.
+        
+        self.creators = ([], False)             # A list of IDs for Creator objects.
+        
         self.pdf = ("", False)               # A path to a PDF.
         self.full_text = ("", False)         # A path to a plain text file.
         self.date_digitized = ("", False)    # http://www.iso.org/iso/iso8601
@@ -99,7 +96,8 @@ class Paper(SeshatObject):
         self.uri = ""                        # This is the handle of the DSpace object, once ingested.
 
         self.start()
-         
+
+
 class DSpace_Object(SeshatObject):
     """These are used to prepare papers for ingestion into a DSpace repository. This class is based on the metadata standards for the Digital HPS Community Repository, which is based on Dublin Core."""
     
@@ -112,7 +110,14 @@ class DSpace_Object(SeshatObject):
         self.start()        
     
         # TODO: add metadata fields
-        
+
+class Creator(SeshatObject):
+    def __init__(self, id=None, name=None, uri=None):
+        self.id = id
+        self.name = name        # The plain-text name, e.g. "Smith, John Q."
+        self.uri = uri          # A URI for an entry in an authority file, e.g. http://www.digitalhps.org/concepts/WID-02374451-N-??-horse
+        self.start()
+
 class Corpus(SeshatObject):
     """A corpus is a collection of papers."""
     

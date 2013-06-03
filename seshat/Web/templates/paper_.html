@@ -26,27 +26,7 @@
             </tr>
             
             {% for creator in paper.creators.0 %}
-            <tr class="creator" id="{{creator.key}}">
-                <td>Name</td>
-                <td><input name="name" class="creator" type="text" id="{{creator.key}}" value="{{creator.name.0}}" /><button type="button" name="check" id="{{creator.key}}">Go</button></td>
-                <td><input type="checkbox" class="creator" name="validated" {% if creator.name.1 %}checked{% endif %}  disabled="disabled" /></td>
-            </tr>
-            <tr>
-                <td>URI</td>
-                <td><input name="uri" class="creator" type="text" value="{{creator.uri.0}}" disabled="disabled"></td>
-                <td><input type="checkbox" class="creator" name="creator_{{creator.uri.0}}.validated" {% if creator.uri.1 %}checked{% endif %}  disabled="disabled" /></td>
-            </tr>
-            <tr>
-                <td>Suggestion</td>
-                <td>
-                    <select name="suggestion" class="creator suggestion" id="select_{{creator.key}}">
-                        <option value="none">None</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" style="border-bottom: 1px solid gray;"></td>
-            </tr>
+
             {% endfor %}
             
             <tr>
@@ -179,6 +159,19 @@
         console.log($(this).prop("id"));
         $("input#"+ $(this).prop("id").toString() + "[name='name']").trigger("change");
     });
+    
+    // User selections a CP suggestion
+    // Update name and URI fields, and send all creator values back to update paper
+    $(".suggestion").on('change', function(e) {
+        var suggestion_id = this.id.replace("select_", "");
+        var selected_uri = $(this).val();
+        var selected_text = $("#"+this.id+" option[value='"+selected_uri+"']").text()
+        
+        $("tr#"+suggestion_id+" input[name='name']").val(selected_text);
+        $("#name_"+suggestion_id).val(selected_uri);
+
+    });
+    
 
     // Everything other than creators.
     $(".input").on('change', function(e) {        

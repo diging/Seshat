@@ -13,6 +13,7 @@ use_library('django', '1.2')
 from google.appengine.ext.webapp import template
 import Datasources.datasource_factory
 import Datasources.mendeley
+import itertools
 
 from google.appengine.api import users
 
@@ -107,15 +108,28 @@ class interface:
             
         return unicode(template.render(config.template_path + template_file, self.template_values))
     
-    def authors (self, user, request, id=None):
+    def creators (self, user, request, id=None):
         """Provides an interface to correct and validate authors across the entire corpus."""
         
         corpus = objects.Corpus(id)        
         papers = [ objects.Paper(p) for p in corpus.papers ]
+        
+        creator_ids = []
+        for paper in papers:
+            for id in paper.creators[0]:
+                if id not in creator_ids:
+                    creator_ids.append(id)
+        creators = [ objects.Creator(id) for id in creator_ids ]
+#        return str(creators)
 
-        authors = []
-#        for paper in papers:
-#            for author in paper.creators[0]:
+        self.template_values['creators'] = [    {
+                                                    'id': creator.id,
+                                                    'name': creator.name,
+                                                    'uri': creator.uri
+                                                } for creator in creators ]
+        self.template_values['papers'] = papers
+                                                
+        return unicode(template.render(config.template_path + "creators.html", self.template_values))
                 
         
     

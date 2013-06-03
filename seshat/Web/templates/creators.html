@@ -1,0 +1,99 @@
+<div id="content">
+
+    <table>
+
+        <tr>
+            <td></td>
+            {% for creator in creators %}
+            <td style="width: 200px;" creator_id="{{creator.id}}"><input type="text" class="creator_name" creator_id="{{creator.id}}" value="{{creator.name}}" style="width: 170px;" /><button type="button" name="check" id="{{creator.id}}" style="width: 20px;">Go</button><br />
+                <input type="text" class="uri" creator_id="{{creator.id}}" value="{{creator.uri}}" style="width: 200px;" disabled /><br />
+                <select class="suggestion" creator_id="{{creator.id}}" style="max-width:200px;">
+                    {% if creator.uri != None %}
+                    <option value="{{creator.uri}}">{{creator.name}}</option>
+                    {% endif %}
+                </select>
+            </td>
+            {% endfor %}
+        </tr>
+        
+        <tr>
+            <td><strong>Select All</strong></td>
+            {% for creator in creators %}
+            <td><input class="all" type="checkbox" creator_id="{{creator.id}}" {% if creator.id in paper.creators.0 %}checked{% endif %} /></td>
+            {% endfor %}
+        </tr>
+
+    {% for paper in papers %}
+
+        <tr>
+            <td>{{paper.title.0}} ({{paper.date.0}})</td>
+            {% for creator in creators %}
+            <td><input type="checkbox" creator_id="{{creator.id}}" {% if creator.id in paper.creators.0 %}checked{% endif %} /></td>
+            {% endfor %}
+        </tr>
+        
+    {% endfor %}
+
+    </table>
+</div>
+
+<script>
+
+    // Just for creator fields.
+    $(".creator_name").on('change', function(e) {
+    
+        var creator_id = $(this).attr("creator_id")
+        $("td[creator_id='"+creator_id+"'] span.create_link").remove();
+        // Get suggestions
+        $.get('{{seshat_home}}/service/conceptpower/' + $(this).val(), function(data) {
+            var jdata = $.parseJSON(data);
+            $("select[creator_id='" + creator_id.toString()+"']").html("");   // Get rid of the "None" option.
+            
+            if (jdata.length == 0) {    // Gives the user a clear indication that a concept was not found.
+                $("select[creator_id='" + creator_id.toString()+"']")
+                    .append($("<option></option>")
+                    .attr("value", "None")
+                    .text("Concept not found"));
+                $("td[creator_id='"+creator_id.toString()+"']")
+                    .append("<span class='create_link'><br /><a href='http://chps.asu.edu/conceptpower' target='_blank'>Create new concept</a></span>");
+
+            } else {
+                $("select[creator_id='" + creator_id.toString()+"']")
+                                    .append($("<option></option>")
+                                    .attr("value", "None")
+                                    .text("Select a concept"));
+                
+                // Write suggestions as options in select list
+                $.each(jdata, function(key, value) {
+                    $("select[creator_id='" + creator_id.toString()+"']")
+                        .append($("<option></option>")
+                        .attr("value", value.uri)
+                        .text(value.name));
+                });
+            }
+        });
+    });
+    
+    // User selects a CP suggestion
+    // Update name and URI fields, and send all creator values back to update paper
+    $(".suggestion").on('change', function(e) {
+        var suggestion_id = $(this).attr("creator_id");
+        var selected_uri = $(this).val();
+        var selected_text = $("option[value='"+selected_uri+"']").text()
+        
+        $("input.creator_name[creator_id='"+suggestion_id+"']").val(selected_text);
+        $("input.uri[creator_id='"+suggestion_id+"']").val(selected_uri);
+
+    });
+
+    // "Go" button works just like changing text in creator name field.
+    $("button[name='check']").on("click", function (e) {
+        $("input.creator_name[creator_id='"+ $(this).prop("id").toString() + "']").trigger("change");
+    });
+    
+    // Sellect all/none
+    $(".all").on("change", function(e) {
+        $("input[type='checkbox'][creator_id='"+$(this).attr("creator_id")+"']").prop("checked", $(this).prop("checked"));
+    });
+
+</script>
