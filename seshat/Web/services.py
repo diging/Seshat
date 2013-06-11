@@ -7,8 +7,6 @@ import cgi
 import wsgiref.handlers
 import config
 import json
-from google.appengine.dist import use_library
-use_library('django', '1.2')
 from google.appengine.ext.webapp import template
 
 from google.appengine.api import users

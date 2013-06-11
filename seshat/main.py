@@ -13,10 +13,9 @@ import Web.main
 import Web.uploads
 import Web.file
 import Web.services
+import Web.export
 
 import wsgiref.handlers
-from google.appengine.dist import use_library
-use_library('django', '1.2')
 
 def main():
     app = webapp2.WSGIApplication([
@@ -37,7 +36,8 @@ def main():
         webapp2.Route(r'/upload', handler=Web.uploads.UploadHandler),
         webapp2.Route(r'/upload_path', handler=Web.uploads.UploadPathHandler),
 
-        webapp2.Route(r'/favicon.ico', handler=Web.null.NullHandler)
+        webapp2.Route(r'/favicon.ico', handler=Web.null.NullHandler),
+        webapp2.Route(r'/export/<corpus_id>', handler=Web.export.ExportHandler)
     ])
     
     wsgiref.handlers.CGIHandler().run(app)

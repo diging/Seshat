@@ -8,8 +8,6 @@ import urllib2
 import webapp2
 import cgi
 import wsgiref.handlers
-from google.appengine.dist import use_library
-use_library('django', '1.2')
 from google.appengine.ext.webapp import template
 import Datasources.datasource_factory
 
