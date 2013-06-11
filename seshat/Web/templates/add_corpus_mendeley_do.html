@@ -39,6 +39,7 @@ $(".paper").each(function () {
     corpus_updated[m_id] = false;
          
     $.post('{{seshat_home}}/corpus/new_paper_from_mendeley', { id: this.id }, function (response, ts, jq) {
+        console.log(response);
         var paper = $.parseJSON(response);
         
         // To update corpus.

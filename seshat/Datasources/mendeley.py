@@ -7,6 +7,7 @@ from Resources import mendeley_client
 import Resources.oauth2 as oauth
 import objects
 import time
+import logging
 
 import Databases.factory_provider
 datafactory = Databases.factory_provider.get_factory()
@@ -126,16 +127,20 @@ class data:
         
         CurrentPaper = objects.Paper()
         
-        try: CurrentPaper.title = (PaperResult['title'], True)
+        try: CurrentPaper.title = (PaperResult['title'].replace("\"","'"), True)
         except KeyError: pass
         try: CurrentPaper.date = (PaperResult['year'], True)
         except KeyError: pass
         try: CurrentPaper.abstract = (PaperResult['abstract'], True)
         except KeyError: pass
         
+        logging.error(CurrentPaper.title)
+        
         pdf_loaded = False
         
-        while not pdf_loaded:
+        tries = 0
+        while not pdf_loaded and tries < 5:
+            tries += 1
             try:
                 pdf_url = self.get_pdf(PaperResult['id'])
                 if pdf_url is not None:
