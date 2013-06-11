@@ -4,6 +4,7 @@ import requests
 import urllib2
 import sys
 import xml.etree.ElementTree as ET
+import logging
 
 vowels = ['a', 'e', 'i', 'o', 'u', 'y']
 
@@ -13,10 +14,9 @@ class authority:
         self.server = "http://chps.asu.edu/conceptpower/rest/"
         
     def search (self, query):
-        """Searches for word of type pos, and returns a list of tuples: (result, uri)."""
+        """Searches for a noun, and returns a list of tuples: (result, uri)."""
         
         query = query.replace(" ", "%20")
-#        sys.exit(query)
         response = urllib2.urlopen(self.server+"ConceptLookup/"+query+"/Noun").read()
         root = ET.fromstring(response)
         if len(root) > 0:
@@ -34,12 +34,13 @@ class authority:
             suggestions += self.search(word_split[0])
         else:
             suggestions += self.search(word)  # Try at face-value.
-        
-        return suggestions
+            word_split = word.split(" ")
+            suggestions += self.search(word_split[-1])
+        logging.error(set(suggestions))
+        return set(suggestions)
 
 def main():
-    
-    print suggest("Bradshaw, Anthony")
+    pass
 
 if __name__ == '__main__':
     status = main()

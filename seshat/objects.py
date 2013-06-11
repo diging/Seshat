@@ -4,6 +4,7 @@ import time
 import random
 import sys
 import Databases.factory_provider
+import logging
 from pprint import pprint
 
 db_factory = Databases.factory_provider.get_factory()
@@ -39,6 +40,7 @@ class SeshatObject:
         for key, value in self.__dict__.iteritems():
             try:    # Only want attributes that are tuples, since those are the ones that can be validated.
                 if value[1]: validated += 1
+                else: logging.error(value)
                 attributes += 1
             except (AttributeError, IndexError):
                 pass

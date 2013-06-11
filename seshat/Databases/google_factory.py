@@ -3,6 +3,7 @@
 from __future__ import with_statement
 from google.appengine.api import files
 
+import logging
 import datetime
 import webapp2
 import pickle
@@ -179,8 +180,9 @@ class GoogleGetter:
         
     def retrieve_only(self, type, field, value):
         """Searches for entities of type with field == value"""
+        logging.error(value)
         if type == 'Creator':
-            return [ match.key.id() for match in db.GqlQuery("SELECT * FROM creator_entity WHERE " + field + " = '" + value + "'") ]
+            return [ match.key().id() for match in db.GqlQuery("SELECT * FROM creator_entity WHERE " + field + " = '" + value + "'") ]
         
 class GoogleGeneric:
     """For storing anything."""

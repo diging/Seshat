@@ -281,8 +281,10 @@ li ol, li ul {
 }
 
 #page-intro {
-	height: 50px;
-	padding: 50px 20px 0;
+	height: 100px;
+	padding: 5px 0px 0;
+	padding-left: 10px; 
+	padding-right: 10px;
 	color: #eee;
 }
 
@@ -295,7 +297,13 @@ li ol, li ul {
 }
 
 #page-intro p {
-	font-size: 12px;
+	font-size: 10px;
+}
+
+
+#page-intro li {
+	padding-top: 0px;
+	font-size: 10px;
 }
 
 #page-intro-small {

@@ -1,3 +1,4 @@
+import logging
 import objects
 import os
 import urllib2
@@ -21,7 +22,6 @@ class ConceptPowerHandler(webapp2.RequestHandler):
         response = [ { 'name': suggestion[0], 'uri': suggestion[1] } for suggestion in cp.suggest(word) ]
         self.response.out.write(json.dumps(response))
         
-
 def main():
     pass
 

@@ -26,8 +26,32 @@
             </tr>
             
             {% for creator in paper.creators.0 %}
-
+            <tr>
+                <td>Creator: </td>
+                <td id="{{ creator }}">{{ creator }}</td>
+                <script>
+                    var request = $.ajax({
+                        url: "{{seshat_home}}/paper/{{paper.id}}/update_creator",
+                        type: "post",
+                        data:
+                            {
+                                'id': '{{creator}}',
+                                'action': 'load',
+                                'name': '',
+                                'uri': '',
+                                'paper': {{paper.id}}
+                            }
+                    });
+                    request.done(function (r, t, j) {
+                        $("td#{{creator}}").html(r);
+                    });
+                </script>
+            </tr>
             {% endfor %}
+            <tr>
+                <td></td>
+                <td><a href="{{seshat_home}}/corpus/creators/{{corpus_id}}">Edit Authors</a></td>
+            </tr>
             
             <tr>
                 <td colspan="2"class="region">Citation</td>
@@ -111,11 +135,6 @@
                 <td>Type</td>
                 <td><input type="text" name="type" class="input" value="{{ paper.type.0 }}" /></td>
                 <td><input type="checkbox" class="input" name="type.validated" {% if paper.type.1 %}checked{% endif %} /></td>
-                <td><div class="batch" id="type">C</div></td>
-            </tr>
-            <tr>
-                <td colspan="2"></td>
-                <td colspan="2" style="font-size:0.8em; text-align: center;"><div id="apply">Apply marked values to entire corpus.</div></td>
             </tr>
 
         </table>
@@ -199,8 +218,8 @@
             data: data
         });
         
-        request.done(function (resonse, textStatus, jqXHR) {
-            console.log(resonse);
+        request.done(function (response, textStatus, jqXHR) {
+            console.log(response);
         });
     });
     

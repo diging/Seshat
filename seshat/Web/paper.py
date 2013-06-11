@@ -1,6 +1,7 @@
 """Human interface for interacting with papers."""
 
 import config
+import logging
 import objects
 import os
 import urllib2
@@ -47,13 +48,20 @@ class interface:
         return unicode(template.render(config.template_path + "paper_.html", self.template_values))
 
     def update_post (self, request, id):
-        """Receives asynchronous requests from the paper view interface, so that changes to a paper are stored as they are made."""
+        """Receives asynchronous requests from the paper view interface, so that changes to a paper can be stored as they are made.
+        
+        request should have the following values:
+            - field
+            - validated
+            - value
+        """
         
         paper = objects.Paper(id)
         path = request.get('field').split(".")
         validated = bool(request.get('validated'))
         value = request.get('value')
-        
+            
+        logging.error(path)
         # User sets a value that has no parent.
         if len(path) == 1:  
             setattr(paper, path[0], (value.replace("\n", ""), validated))
@@ -76,6 +84,74 @@ class interface:
             paper.__dict__[str(path[0])][0][str(path[1])] = (value, validated)
         paper.update()
 
+        return None
+        
+    def update_creator_post (self, request, id):
+        action = request.get("action")      # Can be 'add', 'update', 'remove'
+        creator_id = request.get("id")              # ID for a creator object
+        creator_name = request.get("name")
+        creator_uri = request.get("uri")
+        
+        
+        if creator_id != '': creator_id = int(creator_id)
+        else: creator_id = None
+        
+        if creator_name == "": creator_name = "New"
+        
+        # Load Paper if ID is provided.
+        paper_id = int(request.get("paper"))        
+        if paper_id != 0: paper = objects.Paper(paper_id)   
+        
+        if action == 'add':
+            if creator_id is not None:    # ID is provided...
+                logging.error("ID provided, loading Creator object: " + str(creator_id))
+                creator = objects.Creator(creator_id)
+            else:   # ID is not provided. Check whether a creator object already exists...
+                logging.error("ID not provided. Checking for existing Creator with name: " + creator_name)
+                matches = objects.Getter().db.retrieve_only('Creator', 'name', creator_name)
+                if (len(matches) > 0) and (creator_name != "New"): 
+                    logging.error("Creator with matching name found: " + creator_name)
+                    putative_creator = objects.Creator(matches[0])
+                    if putative_creator.uri == creator_uri:   # Only accept as identical if we're really sure (i.e. uri matches).
+                        logging.error("URI match; using existing creator: " + putative_creator.uri)
+                        creator = putative_creator
+                    else:
+                        logging.error("URI does not match; generate new Creator: " + creator_uri)
+                        creator = None
+                else:
+                    logging.error("No matching Creator found; generate new Creator: " + creator_name)
+                    creator = None
+            if creator is None:     # No matching creator found. Create one from scratch...
+                logging.error("Generating new Creator.")
+                creator = objects.Creator()
+                creator.name = creator_name
+                creator.uri = creator_uri
+                creator.update()
+            
+            if paper_id != 0:   # We may just want to create a new Creator, and not assign it to a Paper.
+                if creator.id not in paper.creators[0]:
+                    paper.creators[0].append(creator.id)
+                    paper.update()
+            return creator.id
+            
+        if action =='update':
+            creator = objects.Creator(creator_id)
+            creator.name = creator_name
+            creator.uri = creator_uri
+            creator.update()
+            return creator.id
+        
+        if action =='remove':   # Should remove from paper, but leave creator entity intact.
+            while creator_id in paper.creators[0]:
+                paper.creators[0].remove(creator_id)
+            paper.update()
+            
+        if action == 'load':    # Retrieve a Creator based on its ID.
+            if creator_id is not None:
+                return objects.Creator(creator_id).name
+            else:
+                return None
+            
         return None
 
 
@@ -109,7 +185,10 @@ class PaperHandler(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             if id is not None:
-                self.response.out.write(interface().update_post(self.request, id))
+                if do == 'update':
+                    self.response.out.write(interface().update_post(self.request, id))
+                if do == 'update_creator':
+                    self.response.out.write(interface().update_creator_post(self.request, id))
         else:
             self.redirect(users.create_login_url(self.request.uri))
 
