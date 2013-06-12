@@ -109,13 +109,7 @@ class interface:
                 matches = objects.Getter().db.retrieve_only('Creator', 'name', creator_name)
                 if (len(matches) > 0) and (creator_name != "New"): 
                     logging.error("Creator with matching name found: " + creator_name)
-                    putative_creator = objects.Creator(matches[0])
-                    if putative_creator.uri == creator_uri:   # Only accept as identical if we're really sure (i.e. uri matches).
-                        logging.error("URI match; using existing creator: " + putative_creator.uri)
-                        creator = putative_creator
-                    else:
-                        logging.error("URI does not match; generate new Creator: " + creator_uri)
-                        creator = None
+                    creator = objects.Creator(matches[0])
                 else:
                     logging.error("No matching Creator found; generate new Creator: " + creator_name)
                     creator = None
