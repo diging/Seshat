@@ -74,12 +74,6 @@
                 <td><input type="checkbox" class="input" name="citation.pages.validated" {% if paper.citation.0.pages.1 %}checked{% endif %} /></td>
             </tr>
             
-            
-            <tr>
-                <td>Description</td>
-                <td><textarea name="description" class="input">{{ paper.description.0 }}</textarea></td>
-                <td><input type="checkbox" class="input" name="description.validated" {% if paper.description.1 %}checked{% endif %} /></td>
-            </tr>
             <tr>
                 <td>Abstract</td>
                 <td><textarea name="abstract" class="input">{{ paper.abstract.0 }}</textarea></td>
