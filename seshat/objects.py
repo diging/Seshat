@@ -44,6 +44,10 @@ class SeshatObject:
             except (AttributeError, IndexError):
                 pass
         return validated/attributes
+    
+    def delete(self):
+        self.db.delete()
+        return None
 
 
 class Paper(SeshatObject):

@@ -86,6 +86,12 @@ class GooglePaper:
             return True
         else:
             self.entity = paper_entity()
+            
+    def delete(self):
+        """Deletes the paper from the datastore."""
+        
+        self.entity.delete()
+        return None
 
     def update(self, object):
         """Map Paper fields onto Google Datastore paper entity, and put it."""
@@ -136,6 +142,12 @@ class GoogleCorpus:
         self.entity.title = object.title
         self.entity.papers = object.papers
         return self.entity.put().id()
+        
+    def delete(self):
+        """Deletes the corpus from the datastore."""
+        
+        self.entity.delete()
+        return None
 
 class GoogleCreator:
     def __init__(self):
@@ -154,6 +166,12 @@ class GoogleCreator:
         self.entity.name = object.name
         self.entity.uri = object.uri
         return self.entity.put().id()
+
+    def delete(self):
+        """Deletes the creator from the datastore."""
+        
+        self.entity.delete()
+        return None
 
 class GoogleGetter:
     """For grabbing bunches of things out of the Google datastore."""

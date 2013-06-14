@@ -5,10 +5,34 @@
             <th width="20%">Size</th>
         </tr>
     {% for corpus in corpora %}
-        <tr>
+        <tr id="{{corpus.id}}">
             <td><a href="corpus/view/{{corpus.id}}">{{corpus.title}}</a></td>
             <td>{{corpus.papers|length}}</td>
+            <td><a href="#" class="delete" id="{{corpus.id}}">Delete</a></td>
         </tr>
     {% endfor %}
     </table>
 </div>
+
+<script>
+
+$(".delete").on("click", function (e) {
+
+    var corpus_id = this.id;
+    console.log("deleting " + corpus_id);
+    var request = $.ajax({
+        url: "{{seshat_home}}/corpus/delete/" + corpus_id,
+        type: "post",
+        data: { id: corpus_id }
+    });
+    
+    request.done(function (r, t, j) {
+        console.log(r);
+        if (r == 'None') {  // If successful, remove corpus from list.
+            $("tr#"+corpus_id).remove();
+        }
+    });
+
+});
+
+</script>

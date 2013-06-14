@@ -146,6 +146,13 @@ class interface:
             
         return None
 
+    def delete_post(self, request, id): # Issue #37.
+        """Deletes a paper."""
+        
+        if id is not None:
+            objects.Paper(id).delete()            
+            return None
+        return "No ID provided."
 
 class PaperHandler(webapp2.RequestHandler):
     """Routes interactions with papers to the interface."""

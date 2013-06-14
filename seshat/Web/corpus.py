@@ -195,6 +195,20 @@ class interface:
                                             }
 
         return unicode(template.render(config.template_path + "add_corpus_success.html", self.template_values))
+        
+    def delete_post(self, user, request, id=None):  # Issue #37
+        """Deletes a corpus and all of its papers."""
+
+        id = request.get("id")
+        if id is not None:
+            corpus = objects.Corpus(id)
+            
+            for paper in corpus.papers:
+                objects.Paper(paper).delete()
+            
+            return corpus.delete()        
+            return None
+        return "No ID provided."
  
 class CorpusHandler(webapp2.RequestHandler):
     """Routes interactions with corpora to the interfaces."""
