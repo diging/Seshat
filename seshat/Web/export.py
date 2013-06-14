@@ -11,11 +11,12 @@ import logging
 from google.appengine.api import users
 import cStringIO as StringIO
 import Databases
+from google.appengine.api import runtime
 db_factory = Databases.factory_provider.get_factory()
 
 
 from contextlib import closing
-from zipfile import ZipFile, ZIP_STORED
+from zipfile import ZipFile, ZIP_STORED, ZIP_DEFLATED
 
 class ExportHandler(webapp2.RequestHandler):
     
@@ -71,23 +72,28 @@ class ExportHandler(webapp2.RequestHandler):
                         line += ',' + str(creator.uri)
                     
                     csv_file +=  line + '\n'
-            outzip.writestr(str(corpus_id) + ".csv", csv_file, compress_type=ZIP_STORED)
-                
+            outzip.writestr(str(corpus_id) + ".csv", csv_file, compress_type=ZIP_DEFLATED)
+#            csv_file = None # Free up some memory
+            
             # Write files to zip, and send to blobstore.
 
             for paper in papers:
                 if paper.pdf[0] != '':  # Fixes issue #31
-                    logging.error(paper.pdf[0])
-                    
-                    outzip.writestr(str(paper.id) + ".pdf", urlfetch.fetch(paper.pdf[0]).content,  compress_type=ZIP_STORED)
-                    outzip.writestr(str(paper.id) + "-cocr.txt", urlfetch.fetch(paper.full_text[0]).content,  compress_type=ZIP_STORED)
-                    
+#                    logging.error(paper.pdf[0])
+                    self.response.out.write('<a href="' + paper.pdf[0] + '/'+str(paper.id)+'.pdf">' + str(paper.id) + '.pdf</a><br />')
+                    self.response.out.write('<a href="' + paper.full_text[0] + '/'+str(paper.id)+'-cocr.txt">' + str(paper.id) + '-cocr.txt</a><br />')
+#                    
+#                    outzip.writestr(str(paper.id) + ".pdf", urlfetch.fetch(paper.pdf[0]).content,  compress_type=ZIP_DEFLATED)
+#                    outzip.writestr(str(paper.id) + "-cocr.txt", urlfetch.fetch(paper.full_text[0]).content,  compress_type=ZIP_DEFLATED)
+#                    
                     if paper.references_text[0] != '':  # Fixes issue #30
-                        outzip.writestr(str(paper.id) + "-references.txt", urlfetch.fetch(paper.references_text[0]).content,  compress_type=ZIP_STORED)
+                        self.response.out.write('<a href="' + paper.references_text[0] + '/'+str(paper.id)+'-references.txt">' + str(paper.id) + '-references.txt</a><br />')
+#                        outzip.writestr(str(paper.id) + "-references.txt", urlfetch.fetch(paper.references_text[0]).content,  compress_type=ZIP_DEFLATED)
 
             outzip.close()
             outfile.seek(0)
             
             blob = db_factory.produce("Blob")
             key = blob.write(outfile.getvalue(), 'application/zip')
-            self.redirect(config.seshat_home + "/file/" + str(key))
+            self.response.out.write('<a href="' + config.seshat_home + '/file/' + str(key) + '">CSV</a>')
+#            self.redirect(config.seshat_home + "/file/" + str(key))

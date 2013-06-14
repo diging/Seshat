@@ -30,6 +30,7 @@ def main():
         webapp2.Route(r'/paper/<id>/<do>', handler=Web.paper.PaperHandler),
         
         webapp2.Route(r'/file/<key>', handler=Web.file.FileHandler),
+        webapp2.Route(r'/file/<key>/<filename>', handler=Web.file.FileHandler),
 
         webapp2.Route(r'/service/conceptpower/<word>', handler=Web.services.ConceptPowerHandler),
         
