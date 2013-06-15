@@ -12,6 +12,7 @@ from google.appengine.ext.webapp import template
 import Datasources.datasource_factory
 import Datasources.mendeley
 import itertools
+import logging
 
 from google.appengine.api import users
 
@@ -39,6 +40,7 @@ class interface:
     def list(self, user, request, id=None):
         """Display a list of all of the corpora."""
 
+        logging.debug("Web.corpus.py: display all corpora.")
         getter = objects.Getter()
         self.template_values['corpora'] = [ objects.Corpus(r) for r in getter.db.retrieve_all("Corpus") ]
 
@@ -47,8 +49,13 @@ class interface:
     def view(self, user, request, id):
         """Display all of the papers in a corpus."""
         
-        corpus = objects.Corpus(id)        
-        papers = [ objects.Paper(p) for p in corpus.papers ]
+        logging.debug("Web.corpus.py: display all papers in corpus with id " + id)
+        corpus = objects.Corpus(id)
+        papers = []       
+        for p in corpus.papers:
+            paper = objects.Paper(p)
+            if paper.id is not None:
+                papers.append(paper)
         
         self.template_values['papers'] = [ {
                                                 'title': paper.title[0],

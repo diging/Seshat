@@ -146,11 +146,19 @@ class interface:
             
         return None
 
-    def delete_post(self, request, id): # Issue #37.
+    def delete_post(self, request, id=None): # Issues #37 and #29.
         """Deletes a paper."""
         
+        id = request.get("id")
+        corpus_id = request.get("corpus")
+        
         if id is not None:
-            objects.Paper(id).delete()            
+            try: objects.Paper(id).delete()
+            except: pass
+            corpus = objects.Corpus(corpus_id)
+            corpus.papers.remove(id)
+            corpus.update()
+
             return None
         return "No ID provided."
 
@@ -188,6 +196,8 @@ class PaperHandler(webapp2.RequestHandler):
                     self.response.out.write(interface().update_post(self.request, id))
                 if do == 'update_creator':
                     self.response.out.write(interface().update_creator_post(self.request, id))
+                if do == 'delete':
+                    self.response.out.write(interface().delete_post(self.request, id))
         else:
             self.redirect(users.create_login_url(self.request.uri))
 

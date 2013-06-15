@@ -34,6 +34,9 @@
                 {% if paper.data.references_text.0 %}</a>{% endif %}
             </td>
             
+            <td>
+                <a href="#" class="delete" id="{{paper.id}}">Delete</a>
+            </td>
         </tr>
        {% endfor %}
         
@@ -140,6 +143,24 @@ $(".file_upload").on("drop", function(e) {
     noopHandler(e);
 });
 
+$(".delete").on("click", function (e) {     // Issue #29
+
+    var paper_id = this.id;
+    console.log("deleting " + paper_id);
+    var request = $.ajax({
+        url: "{{seshat_home}}/paper/" + paper_id + "/delete",
+        type: "post",
+        data: { id: paper_id, corpus: '{{corpus_id}}' }
+    });
+    
+    request.done(function (r, t, j) {
+        console.log(r);
+        if (r == 'None') {  // If successful, remove paper from list.
+            $("tr#"+paper_id).remove();
+        }
+    });
+
+});
 
     
 </script>

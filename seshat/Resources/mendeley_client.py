@@ -27,6 +27,7 @@ import requests
 import sys
 import urllib
 import objects
+import logging
 
 import apidefinitions
 
@@ -272,11 +273,12 @@ class MendeleyTokensStore:
     def load(self):
         getter = objects.Getter()
         try:
-            self.account_data = [ objects.Token(t) for t in getter.db.retrieve_all("Token") ]
+            self.account_data = [ objects.Token(t) for t in getter.db.retrieve_all("Token") if t is not None ]
             for a in self.account_data:
                 self.accounts[a.account_key] = a.account
         
-        except Exception:   # If no tokens exist yet.
+        except Exception as e:   # If no tokens exist yet.
+            logging.debug(str(e))
             null_token = objects.Token()
             null_token.account = {}
             null_token.update()

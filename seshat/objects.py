@@ -23,14 +23,24 @@ class SeshatObject:
     def start(self):
         """Generates a new datastore entity, or loads an existing entity if id is set."""
         
+        logging.debug("Initializing a SeshatObject of type " + self.__class__.__name__)
         self.db = db_factory.produce(self.__class__.__name__)
         if self.id is not None:
-            self.db.load(self.id)
-            for key, value in self.db.data.iteritems():
-                setattr(self, key, value)
+            logging.debug("Loading SeshatObject of type " + self.__class__.__name__ + ", with id " + str(self.id))
+            if self.db.load(self.id):
+                for key, value in self.db.data.iteritems():
+                    setattr(self, key, value)
+            else:
+                logging.debug("objects.py: failed to load SeshatObject of type " + self.__class__.__name__ + ", with id " + str(self.id))
+                self.id = None
+        return None
 
     def update(self):
+        """Calls the update() method of the db entity."""
+        
+        logging.debug("Updating SeshatObject of type " + self.__class__.__name__ + ", with id " + str(self.id))
         self.id = self.db.update(self)
+        return self.id
 
     def completion(self):
         """Checks how many of the attributes have been validated, and returns the proportion (float)."""
@@ -45,8 +55,13 @@ class SeshatObject:
                 pass
         return validated/attributes
     
-    def delete(self):
-        self.db.delete()
+    def delete(self):   # Issues #29 and #37
+        """Calls the delete method for the db entity associated with the SeshatObject."""
+        
+        logging.debug("Deleting SeshatObject of type " + self.__class__.__name__ + ", with id " + str(self.id))
+        
+        if self.db is not None:
+            self.db.delete()
         return None
 
 
@@ -146,7 +161,7 @@ class Token(SeshatObject):
 
     def __init__(self, id=None):
         self.id = id
-
+        
         self.start()
 
 class Generic(SeshatObject):

@@ -46,51 +46,58 @@ class GooglePaper:
         """Get a Google Datastore paper_entity, and map Paper fields onto Google Datastore paper entity."""
 
         if id is not None:
-        
+            logging.debug("GooglePaper: Loading paper_entity for Paper with id " + str(id))
             key = db.Key.from_path(self.entity.kind(), int(id))
+#            logging.debug("GooglePaper: paper_entity key is " + str(key))
             self.entity = db.get(key)
         
-            self.data = {
-                            'title':    (self.entity.title, self.entity.title_validated),
-                            'citation': ({
-                                            'journal': (self.entity.journal, self.entity.journal_validated),
-                                            'volume': (self.entity.volume, self.entity.volume_validated),
-                                            'pages': (self.entity.pages, self.entity.pages_validated)
-                                         }
-                                    , self.entity.citation_validated),
-                            'date': (self.entity.date, self.entity.date_validated),
-                            'description': (self.entity.description, self.entity.description_validated),
-                            'source': (
-                                           {
-                                                'source': (self.entity.source_name, self.entity.source_name_validated),
-                                                'uri': (self.entity.source_uri, self.entity.source_uri_validated)
-                                           }
-                                       , self.entity.source_validated),
-                            'abstract': (self.entity.abstract, self.entity.abstract_validated),
-                            'pdf': (self.entity.pdf, self.entity.pdf_validated),
-                            'full_text': (self.entity.full_text, self.entity.full_text_validated),
-                            'date_digitized': (self.entity.date_digitized, self.entity.date_digitized_validated),
-                            'rights': (
-                                            {
-                                                'rights': (self.entity.rights_value, self.entity.rights_value_validated),
-                                                'holder': (self.entity.rights_holder, self.entity.rights_holder_validated)
-                                            }
-                                    , self.entity.rights_validated),
-                            'references_text': (self.entity.references_text, self.entity.references_text_validated),
-                            'language': (self.entity.language, self.entity.language_validated),
-                            'type': (self.entity.type, self.entity.type_validated),
-                            'creators': (self.entity.creators, self.entity.creators_validated),
-                            'uri': self.entity.uri
-                        }
-                    
-            return True
+            if self.entity is not None:
+                logging.debug("GooglePaper: paper_entity loaded, updating properties.")
+                self.data = {
+                                'title':    (self.entity.title, self.entity.title_validated),
+                                'citation': ({
+                                                'journal': (self.entity.journal, self.entity.journal_validated),
+                                                'volume': (self.entity.volume, self.entity.volume_validated),
+                                                'pages': (self.entity.pages, self.entity.pages_validated)
+                                             }
+                                        , self.entity.citation_validated),
+                                'date': (self.entity.date, self.entity.date_validated),
+                                'description': (self.entity.description, self.entity.description_validated),
+                                'source': (
+                                               {
+                                                    'source': (self.entity.source_name, self.entity.source_name_validated),
+                                                    'uri': (self.entity.source_uri, self.entity.source_uri_validated)
+                                               }
+                                           , self.entity.source_validated),
+                                'abstract': (self.entity.abstract, self.entity.abstract_validated),
+                                'pdf': (self.entity.pdf, self.entity.pdf_validated),
+                                'full_text': (self.entity.full_text, self.entity.full_text_validated),
+                                'date_digitized': (self.entity.date_digitized, self.entity.date_digitized_validated),
+                                'rights': (
+                                                {
+                                                    'rights': (self.entity.rights_value, self.entity.rights_value_validated),
+                                                    'holder': (self.entity.rights_holder, self.entity.rights_holder_validated)
+                                                }
+                                        , self.entity.rights_validated),
+                                'references_text': (self.entity.references_text, self.entity.references_text_validated),
+                                'language': (self.entity.language, self.entity.language_validated),
+                                'type': (self.entity.type, self.entity.type_validated),
+                                'creators': (self.entity.creators, self.entity.creators_validated),
+                                'uri': self.entity.uri
+                            }
+                return True
+            else:
+                logging.debug("GooglePaper: paper_entity with id " + id + " not found.")
+                return False
         else:
+            logging.debug("GooglePaper: Creating new paper_entity.")
             self.entity = paper_entity()
             
     def delete(self):
         """Deletes the paper from the datastore."""
         
-        self.entity.delete()
+        if self.entity is not None:
+            self.entity.delete()
         return None
 
     def update(self, object):
@@ -135,6 +142,7 @@ class GoogleCorpus:
                 'title': self.entity.title,
                 'papers': self.entity.papers
             }
+            return True
 
     def update(self, object):
         """Map Corpus fields onto Google Datastore corpus entity, and put it."""
@@ -162,6 +170,8 @@ class GoogleCreator:
                 'name': self.entity.name,
                 'uri': self.entity.uri
             }
+            return True
+            
     def update(self, object):
         self.entity.name = object.name
         self.entity.uri = object.uri
@@ -244,8 +254,10 @@ class GoogleToken:
             }
 
     def update(self, object):
-        self.entity.account = object.account
-        self.entity.account_key = object.account_key
+        try: self.entity.account = object.account
+        except: pass
+        try: self.entity.account_key = object.account_key
+        except: pass
         return self.entity.put().id()
 
 class GoogleBlob:
