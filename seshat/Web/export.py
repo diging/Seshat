@@ -12,6 +12,8 @@ from google.appengine.api import users
 import cStringIO as StringIO
 import Databases
 from google.appengine.api import runtime
+import string
+
 db_factory = Databases.factory_provider.get_factory()
 
 
@@ -52,7 +54,9 @@ class ExportHandler(webapp2.RequestHandler):
             
             for paper in papers:
                 if paper.pdf[0] != '':  # Fixes issue #31
-                    line = str(paper.id) + ".pdf|" + str(paper.id) + "-cocr.txt|" + str(paper.id) + "-references.txt"
+                    line = str(paper.id) + ".pdf|" + str(paper.id) + "-cocr.txt|" + str(paper.id)
+                    if paper.references_text[0] != '':  # Fixes issue #40
+                        line += "-references.txt"
                     line += ',"' + paper.title[0] + '"'
                     line += ',' + paper.date[0]
                     line += ',"' + paper.abstract[0].replace("\"", "") + '"'
@@ -72,6 +76,8 @@ class ExportHandler(webapp2.RequestHandler):
                         line += ',' + str(creator.uri)
                     
                     csv_file +=  line + '\n'
+                    
+            csv_file = filter(lambda x: x in string.printable, csv_file)    # This is a short-term solution...
             outzip.writestr(str(corpus_id) + ".csv", csv_file, compress_type=ZIP_DEFLATED)
 #            csv_file = None # Free up some memory
             
