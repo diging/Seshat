@@ -26,7 +26,10 @@ class data:
                 
         for record in self.parser.records:
             paper = objects.Paper()
-            paper.title = (self.parser.records[record]['title'], False)
+            try:    # Resolves issue #25
+                paper.title = (self.parser.records[record]['title'], False)
+            except KeyError:
+                pass
             try:
                 paper.citation[0]['journal'] = (self.parser.records[record]['journal'], False)
             except KeyError:
@@ -42,23 +45,27 @@ class data:
             except KeyError:
                 pass
 
-            paper.date = (self.parser.records[record]['issued']['literal'], False)
+            try:
+                paper.date = (self.parser.records[record]['issued']['literal'], False)
+            except KeyError:
+                pass
             
             
             creators = []
-            for author in  self.parser.records[record]['author']:
-                try:
-                    author_name = author['family'].encode('ascii', 'ignore') + ", " + author['given'].encode('ascii', 'ignore')
-                except KeyError:
-                    author_name = author['family'].encode('ascii', 'ignore')
+            if 'author' in self.parser.records[record]:
+                for author in  self.parser.records[record]['author']:
+                    try:
+                        author_name = author['family'].encode('ascii', 'ignore') + ", " + author['given'].encode('ascii', 'ignore')
+                    except KeyError:
+                        author_name = author['family'].encode('ascii', 'ignore')
 
-                matches = objects.Getter().db.retrieve_only('Creator', 'name', author_name)
-                if len(matches) > 0:    # Assume that if we find something, it has to be right.
-                    creator = objects.Creator(matches[0])
-                creator = objects.Creator()
-                creator.name = author_name
-                creator.update()
-                creators.append(creator)
+                    matches = objects.Getter().db.retrieve_only('Creator', 'name', author_name)
+                    if len(matches) > 0:    # Assume that if we find something, it has to be right.
+                        creator = objects.Creator(matches[0])
+                    creator = objects.Creator()
+                    creator.name = author_name
+                    creator.update()
+                    creators.append(creator)
           
             paper.creators = ( [ creator.id for creator in creators ], False)
             
