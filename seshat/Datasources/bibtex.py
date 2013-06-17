@@ -62,9 +62,10 @@ class data:
                     matches = objects.Getter().db.retrieve_only('Creator', 'name', author_name)
                     if len(matches) > 0:    # Assume that if we find something, it has to be right.
                         creator = objects.Creator(matches[0])
-                    creator = objects.Creator()
-                    creator.name = author_name
-                    creator.update()
+                    else:   # Should fix #24 !
+                        creator = objects.Creator()
+                        creator.name = author_name
+                        creator.update()
                     creators.append(creator)
           
             paper.creators = ( [ creator.id for creator in creators ], False)
