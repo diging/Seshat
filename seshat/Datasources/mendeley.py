@@ -135,21 +135,22 @@ class data:
         except KeyError: pass
         
         logging.error(CurrentPaper.title)
-        
-        pdf_loaded = False
-        
-        tries = 0
-        while not pdf_loaded and tries < 5:
-            tries += 1
-            try:
-                pdf_url = self.get_pdf(PaperResult['id'])
-                if pdf_url is not None:
-                    CurrentPaper.pdf = (pdf_url, True)
-                else:
-                    CurrentPaper.pdf = ("", False)
-                pdf_loaded = True
-            except:
-                pass
+
+# Mendeley just isn't playing nicely. Disabling PDF download for now. See issue #26.
+#        pdf_loaded = False
+#        
+#        tries = 0
+#        while not pdf_loaded and tries < 5:
+#            tries += 1
+#            try:
+#                pdf_url = self.get_pdf(PaperResult['id'])
+#                if pdf_url is not None:
+#                    CurrentPaper.pdf = (pdf_url, True)
+#                else:
+#                    CurrentPaper.pdf = ("", False)
+#                pdf_loaded = True
+#            except:
+#                pass
         
         try: CurrentPaper.citation[0]['journal'] = (PaperResult['published_in'], True)
         except KeyError: pass
